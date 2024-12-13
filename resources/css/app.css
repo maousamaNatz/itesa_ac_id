@@ -1,0 +1,27 @@
+/* Mencegah layout shift untuk gambar */
+img {
+    aspect-ratio: attr(width) / attr(height);
+    height: auto;
+}
+
+/* Mencegah layout shift untuk konten yang belum dimuat */
+.content-placeholder {
+    min-height: 1px;
+    contain: layout style paint;
+}
+
+/* Mencegah layout shift untuk font */
+html:not(.fonts-loaded) {
+    visibility: hidden;
+}
+
+html.fonts-loaded {
+    visibility: visible;
+}
+
+/* Mencegah layout shift untuk iklan atau embedded content */
+[data-ad],
+[data-embed] {
+    min-height: 1px;
+    contain: layout style paint;
+}
