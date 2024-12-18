@@ -1,4 +1,4 @@
-<aside id="sidebar" class="fixed top-0 -left-64 lg:left-0 z-30 w-64 h-screen transition-all duration-300 bg-white">
+<aside class="sidebar fixed top-0 -left-64 lg:left-0 z-30 w-64 h-screen transition-all duration-300 bg-white">
     <div class="flex items-center justify-center h-16 border-b">
         <img src="{{ asset('lib/default_media/logos.png') }}" alt="logo itesa" class="h-10 w-10 mr-2">
         <div>

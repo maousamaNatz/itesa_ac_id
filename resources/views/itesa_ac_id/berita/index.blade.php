@@ -41,7 +41,7 @@
                                             alt="{{ $article->title }}" loading="lazy">
                                     </div>
                                     <div class="feature-content">
-                                        <h2>{{ $article->title }}</h2>
+                                        <h2>{!! Str::limit(strip_tags($article->title), 50, '...') !!}</h2>
                                         <div class="meta-info">
                                             <span class="date">{{ $article->published_at->format('d M Y') }}</span>
                                             <span class="views">{{ number_format($article->views) }} views</span>
@@ -95,8 +95,8 @@
                                 <span class="month">{{ $agenda->start_date->format('M') }}</span>
                             </div>
                             <div class="announcement-content">
-                                <h3>{{ $agenda->title }}</h3>
-                                <p>{{ $agenda->description }}</p>
+                                <h3>{!! Str::limit(strip_tags($agenda->title), 90, '...') !!}</h3>
+                                <p>{!! Str::limit(strip_tags($agenda->description), 200, '...') !!}</p>
                                 <a href="{{ route('berita.agendaShow') }}" class="read-more">Selengkapnya</a>
                             </div>
                         </article>
@@ -116,7 +116,7 @@
                             style="text-decoration: none; color: inherit;">
                             <span class="number">{{ str_pad($loop->iteration, 2, '0', STR_PAD_LEFT) }}</span>
                             <div class="popular-content">
-                                <h4>{{ $popularArticle->title }}</h4>
+                                <h4>{!! Str::limit(strip_tags($popularArticle->title), 20, '...') !!}</h4>
                                 <span class="views">{{ number_format($popularArticle->views) }} views</span>
                             </div>
                         </a>

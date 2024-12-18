@@ -5,6 +5,9 @@ use App\Http\Controllers\BeritaController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\InController;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\CommentController;
+use App\Models\User;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -25,7 +28,6 @@ use App\Http\Controllers\LoginController;
 Route::get('/login', [LoginController::class, 'index'])->name('login');
 Route::post('/login', [LoginController::class, 'authenticate']);
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
-
 /*
 *
 * Route Index
@@ -48,7 +50,7 @@ Route::prefix('berita')->name('berita.')->group(function () {
     Route::get('/archive/{year}/{month}', [BeritaController::class, 'archive'])->name('archive');
     Route::get('/category/{slug?}', [BeritaController::class, 'category'])->name('category');
     Route::get('/search', [BeritaController::class, 'search'])->name('search');
-    Route::get('/{slug}', [BeritaController::class, 'show'  ])->name('show');
+    Route::get('/{slug}', [BeritaController::class, 'show'])->name('show');
     Route::get('/agenda', [BeritaController::class, 'agendaShow'])->name('agendaShow');
 });
 
@@ -58,9 +60,18 @@ Route::prefix('berita')->name('berita.')->group(function () {
 * Route Admin
 *
 */
+Route::middleware(['auth'])->group(function () {
+    Route::post('/comments', [CommentController::class, 'store'])->name('comments.store');
+    Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy');
+    Route::post('/comments/reply', [CommentController::class, 'reply'])->name('comments.reply');
+});
+
 Route::middleware(['auth', 'admin'])->prefix('dash')->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('admin.dashboard');
-
+    Route::get('/dashboard/profile', [DashboardController::class, 'showProfile'])->name('profile.show');
+    Route::get('/dashboard/profile/edit', [DashboardController::class, 'editProfile'])->name('profile.edit');
+    Route::post('/profile/update', [DashboardController::class, 'updateProfile'])->name('profile.update');
+    Route::post('/profile/upload', [DashboardController::class, 'updateImgs'])->name('profile.upload');
     /*
     *
     * Route Article
@@ -71,8 +82,8 @@ Route::middleware(['auth', 'admin'])->prefix('dash')->group(function () {
         Route::get('/create', [DashboardController::class, 'createarticle'])->name('create');
         Route::post('/store', [DashboardController::class, 'storeArticle'])->name('store');
         Route::get('/show/{slug}', [DashboardController::class, 'show'])->name('show');
-        Route::get('/edit/{id}', [DashboardController::class, 'editarticle'])->name('edit')->middleware('admin');
-        Route::put('/update/{id}', [DashboardController::class, 'updatearticle'])->name('update')->middleware('admin');
+        Route::get('/edit/{id}', [DashboardController::class, 'editarticle'])->name('edit');
+        Route::put('/update/{id}', [DashboardController::class, 'updatearticle'])->name('update');
         Route::delete('/{article}', [DashboardController::class, 'destroyarticle'])->name('destroy');
     });
 
@@ -98,7 +109,7 @@ Route::middleware(['auth', 'admin'])->prefix('dash')->group(function () {
     Route::prefix('comment')->name('admin.comment.')->group(function () {
         Route::get('/', [DashboardController::class, 'comment'])->name('index');
         Route::get('/{comment}/edit', [DashboardController::class, 'editcomment'])->name('edit');
-        Route::delete('/{comment}', [DashboardController::class, 'destroycomment'])->name('destroy')->middleware('admin');
+        Route::delete('/{comment}', [DashboardController::class, 'destroycomment'])->name('destroy');
     });
 
     /*
@@ -158,3 +169,20 @@ if (config('app.debug')) {
     });
 }
 
+Route::get('/api/users/search', function(Request $request) {
+    $query = $request->get('query');
+    return User::where('name', 'LIKE', "%{$query}%")
+               ->select('id', 'name', 'avatar')
+               ->limit(5)
+               ->get();
+});
+
+Route::get('/comments/load-new/{article}/{lastId}', [CommentController::class, 'loadNew'])->name('comments.loadNew');
+Route::get('/comments/get-article-comments/{articleId}', [CommentController::class, 'getArticleComments']);
+Route::get('/comments/count/{articleId}', [CommentController::class, 'getCommentCount']);
+
+// Routes untuk registrasi
+Route::middleware('guest')->group(function () {
+    Route::get('/register', [App\Http\Controllers\RegisterController::class, 'index'])->name('register');
+    Route::post('/register', [App\Http\Controllers\RegisterController::class, 'store']);
+});

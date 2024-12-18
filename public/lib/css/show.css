@@ -14,21 +14,27 @@ body{
     margin-bottom: 4em;
     width: 100%;
     max-width: 98sem;
-    /* background: red; */
 }
 /* === Content === */
 .content{
     display: flex;
+    width: 100%;
     justify-content: center;
 }
 .content > div{
     max-width: 64em;
+    width: 100%;
 }
 .tag-title-main{
+    overflow: hidden;
+    width: 100%;
     margin: 1em 0 1.3em 0;
 }
 .tag-title-main h3{
     font-size: 30px;
+    width: 100%;
+    text-wrap: wrap;
+    display: flex;
     font-weight: 650;
     color: #424242;
 }
@@ -971,15 +977,14 @@ body{
     text-decoration: underline;
 }
 
-/* TinyMCE Content Styling */
-.content-main-desc .tox-tinymce-aux,
+/* Style untuk konten TinyMCE */
 .content-main-desc {
-    font-family: "Kanit", sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
     line-height: 1.6;
-    color: #424242;
+    color: #333;
 }
 
-/* Headings */
+/* Heading */
 .content-main-desc h1,
 .content-main-desc h2,
 .content-main-desc h3,
@@ -999,46 +1004,45 @@ body{
 .content-main-desc h5 { font-size: 1.1em; }
 .content-main-desc h6 { font-size: 1em; }
 
-/* Paragraphs and Lists */
+/* Paragraf */
 .content-main-desc p {
-    margin-bottom: 1.2em;
-    font-size: 1.1em;
+    margin: 1em 0;
     line-height: 1.8;
 }
 
+/* List */
 .content-main-desc ul,
 .content-main-desc ol {
-    margin: 1em 0 1em 1.5em;
-    padding-left: 1em;
+    margin: 1em 0;
+    padding-left: 2em;
 }
 
 .content-main-desc li {
-    margin-bottom: 0.5em;
-    line-height: 1.6;
+    margin: 0.5em 0;
 }
 
-/* Links */
+/* Link */
 .content-main-desc a {
     color: #bd2d2d;
     text-decoration: none;
-    border-bottom: 1px solid transparent;
-    transition: all 0.2s ease;
+    transition: color 0.3s ease;
 }
 
 .content-main-desc a:hover {
-    border-bottom-color: #bd2d2d;
+    color: #8c1f1f;
+    text-decoration: underline;
 }
 
-/* Images */
+/* Gambar */
 .content-main-desc img {
     max-width: 100%;
     height: auto;
-    margin: 1.5em 0;
     border-radius: 8px;
+    margin: 1.5em 0;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
-/* Blockquotes */
+/* Blockquote */
 .content-main-desc blockquote {
     margin: 1.5em 0;
     padding: 1em 1.5em;
@@ -1048,30 +1052,7 @@ body{
     border-radius: 0 8px 8px 0;
 }
 
-.content-main-desc blockquote p {
-    margin: 0;
-    color: #555;
-}
-
-/* Code Blocks */
-.content-main-desc pre {
-    background: #f8f9fa;
-    padding: 1em;
-    border-radius: 8px;
-    overflow-x: auto;
-    margin: 1.5em 0;
-    font-family: 'Courier New', Courier, monospace;
-}
-
-.content-main-desc code {
-    background: #f1f1f1;
-    padding: 0.2em 0.4em;
-    border-radius: 4px;
-    font-size: 0.9em;
-    color: #bd2d2d;
-}
-
-/* Tables */
+/* Tabel */
 .content-main-desc table {
     width: 100%;
     border-collapse: collapse;
@@ -1094,48 +1075,40 @@ body{
     font-weight: 600;
 }
 
-/* Horizontal Rule */
-.content-main-desc hr {
-    margin: 2em 0;
-    border: none;
-    border-top: 2px solid #e0e0e0;
-}
-
-/* Figure and Captions */
-.content-main-desc figure {
+/* Code blocks */
+.content-main-desc pre {
+    background: #f8f9fa;
+    padding: 1em;
+    border-radius: 8px;
+    overflow-x: auto;
     margin: 1.5em 0;
-    text-align: center;
+    font-family: 'Courier New', Courier, monospace;
 }
 
-.content-main-desc figcaption {
-    margin-top: 0.5em;
+.content-main-desc code {
+    background: #f1f1f1;
+    padding: 0.2em 0.4em;
+    border-radius: 4px;
     font-size: 0.9em;
-    color: #666;
-    font-style: italic;
+    color: #bd2d2d;
 }
 
-/* Responsive Design */
+/* Responsive */
 @media screen and (max-width: 768px) {
     .content-main-desc {
         font-size: 0.95em;
     }
 
-    .content-main-desc h1 { font-size: 1.8em; }
-    .content-main-desc h2 { font-size: 1.6em; }
-    .content-main-desc h3 { font-size: 1.4em; }
-    .content-main-desc h4 { font-size: 1.2em; }
-    .content-main-desc h5 { font-size: 1.1em; }
+    .content-main-desc h1 { font-size: 1.75em; }
+    .content-main-desc h2 { font-size: 1.5em; }
+    .content-main-desc h3 { font-size: 1.25em; }
+    .content-main-desc h4 { font-size: 1.1em; }
+    .content-main-desc h5,
     .content-main-desc h6 { font-size: 1em; }
 
     .content-main-desc blockquote {
         margin: 1em 0;
         padding: 0.75em 1em;
-    }
-
-    .content-main-desc table {
-        display: block;
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
     }
 }
 
@@ -1230,4 +1203,793 @@ body{
 /* Pastikan konten utama tidak tertutup navbar */
 main.container {
     padding-top: calc(var(--navbar-height) + 20px);
+}
+
+/* Perbaikan responsive untuk konten utama */
+@media screen and (max-width: 1200px) {
+    body{
+        overflow-x: hidden;
+    }
+    .content > div {
+        max-width: 90%;
+        padding: 0 1rem;
+    }
+}
+
+@media screen and (max-width: 992px) {
+    .content-all {
+        flex-direction: column;
+    }
+
+    .content-main {
+        width: 100%;
+    }
+
+    .content-another {
+        width: 100%;
+        margin-top: 2rem;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    body{
+        padding: 0;
+        margin: 0;
+    }
+    main.container{
+        padding: 0;
+    }
+    .content{
+        padding: 0;
+        margin: 0;
+        /* background-color: #1877f2; */
+    }
+    .content > div{
+        padding: 0;
+        width: 100%;
+    }
+    .container{
+        padding: 0;
+    }
+    .tag-title-main h3 {
+        font-size: 24px;
+    }
+
+    .profile {
+        padding: 0.75rem;
+    }
+
+    .content-main-img img {
+        border-radius: 8px;
+    }
+
+    /* Perbaikan media sosial share buttons */
+    .media-items {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .media-item {
+        flex: 1 1 calc(50% - 0.5rem);
+        min-width: auto;
+    }
+
+    /* Perbaikan artikel terkait */
+    .card-random-link {
+        flex-direction: column;
+    }
+
+    .random-img {
+        flex: none;
+        width: 100%;
+        height: 180px;
+    }
+
+    .random-txt {
+        padding: 0.5rem 0;
+    }
+
+}
+
+@media screen and (max-width: 480px) {
+    .tag-title-main h3 {
+        font-size: 20px;
+    }
+
+    .profile-name h4 {
+        font-size: 14px;
+    }
+
+    .profile-name h5 {
+        font-size: 12px;
+    }
+
+    /* Perbaikan tampilan kategori */
+    .categories-list {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.5rem;
+    }
+
+    .category-item {
+        padding: 0.5rem;
+        font-size: 13px;
+    }
+
+    /* Perbaikan artikel populer mingguan */
+    .weekly-articles {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .article-info h4 {
+        font-size: 16px;
+    }
+}
+
+/* === Comment Section Styles === */
+.comments-area {
+    margin: 2rem 0;
+    padding: 1.5rem;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.comments-area h4 {
+    font-size: 1.25rem;
+    color: #2c3e50;
+    margin-bottom: 1.5rem;
+    font-weight: 600;
+}
+
+/* Comment Item */
+.comment {
+    background: #f8f9fa;
+    margin-bottom: 1rem;
+    transition: transform 0.2s ease;
+}
+
+.comment:hover {
+    transform: translateX(5px);
+}
+
+/* Avatar Style */
+.avatar {
+    position: relative;
+}
+
+.avatar img {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    border: 2px solid #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Comment Content */
+.comment-content {
+    flex: 1;
+}
+
+.comment-header h6 {
+    color: #2c3e50;
+    font-weight: 600;
+    margin: 0;
+}
+
+.comment-header small {
+    color: #666;
+    font-size: 0.85rem;
+}
+
+/* Comment Text */
+.comment-content p {
+    margin: 0.5rem 0;
+    color: #424242;
+    line-height: 1.5;
+}
+
+/* Reply Button */
+.reply-btn {
+    color: #bd2d2d;
+    font-size: 0.9rem;
+    padding: 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.reply-btn:hover {
+    color: #8c1f1f;
+    text-decoration: underline;
+}
+
+/* Reply Section */
+.replies {
+    border-left: 2px solid #e0e0e0;
+    margin-left: 2rem;
+    padding-left: 1rem;
+}
+
+.reply {
+    background: #fff;
+    margin-bottom: 0.5rem;
+}
+
+/* Comment Form */
+.comment-form {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e0e0e0;
+}
+
+.comment-form textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    resize: vertical;
+    min-height: 100px;
+    transition: border-color 0.2s ease;
+}
+
+.comment-form textarea:focus {
+    outline: none;
+    border-color: #bd2d2d;
+}
+
+.comment-form button {
+    background: #bd2d2d;
+    color: #fff;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    margin-top: 1rem;
+}
+
+.comment-form button:hover {
+    background: #8c1f1f;
+}
+
+/* Reply Form */
+.reply-form {
+    margin-left: 3rem;
+    margin-top: 0.5rem;
+}
+
+.reply-form textarea {
+    font-size: 0.9rem;
+    min-height: 80px;
+}
+
+/* Responsive Styles */
+@media screen and (max-width: 768px) {
+    .comments-area {
+        padding: 1rem;
+    }
+
+    .comment {
+        padding: 0.75rem;
+    }
+
+    .replies {
+        margin-left: 1rem;
+    }
+
+    .reply-form {
+        margin-left: 1.5rem;
+    }
+
+    .comment-form button {
+        width: 100%;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .comments-area h4 {
+        font-size: 1.1rem;
+    }
+
+    .avatar img {
+        width: 32px;
+        height: 32px;
+    }
+
+    .comment-header h6 {
+        font-size: 0.9rem;
+    }
+
+    .comment-content p {
+        font-size: 0.9rem;
+    }
+
+    .replies {
+        margin-left: 0.5rem;
+        padding-left: 0.5rem;
+    }
+
+    .reply-form {
+        margin-left: 1rem;
+    }
+}
+
+/* Alert Styles */
+.alert {
+    padding: 1rem;
+    border-radius: 8px;
+    margin: 1rem 0;
+}
+
+.alert-info {
+    background: #e3f2fd;
+    color: #0d47a1;
+    border: 1px solid #bbdefb;
+}
+
+/* Invalid Feedback */
+.invalid-feedback {
+    color: #dc3545;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+.comments-section {
+    max-width: 800px;
+    margin: 2rem auto;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell;
+}
+
+/* Form Komentar */
+.comment-form {
+    background: #fff;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+}
+
+.comment-form:focus-within {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+}
+
+.comment-form textarea {
+    width: 100%;
+    border: 1px solid #e1e4e8;
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 14px;
+    line-height: 1.5;
+    resize: none;
+    transition: all 0.2s ease;
+}
+
+.comment-form textarea:focus {
+    border-color: #0366d6;
+    box-shadow: 0 0 0 3px rgba(3, 102, 214, 0.1);
+    outline: none;
+}
+
+.comment-form button[type="submit"] {
+    background: #0366d6;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.comment-form button[type="submit"]:hover {
+    background: #0256b4;
+    transform: translateY(-1px);
+}
+
+/* Daftar Komentar */
+.comments-list {
+    margin-top: 2rem;
+}
+/* Avatar */
+.comment-avatar {
+    position: relative;
+}
+
+.comment-avatar img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.comment-avatar::after {
+    content: '';
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    width: 8px;
+    height: 8px;
+    background: #28a745;
+    border-radius: 50%;
+    border: 2px solid #fff;
+}
+
+/* Konten Komentar */
+.comment-content {
+    flex: 1;
+    margin-left: 1rem;
+}
+
+.comment-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.comment-username {
+    font-weight: 600;
+    color: #24292e;
+    font-size: 14px;
+}
+
+.comment-time {
+    font-size: 12px;
+    color: #586069;
+    margin-left: 0.5rem;
+}
+
+.comment-text {
+    font-size: 14px;
+    line-height: 1.6;
+    color: #24292e;
+    word-break: break-word;
+}
+
+/* Tombol Aksi */
+.comment-actions {
+    margin-top: 0.5rem;
+    display: flex;
+    gap: 1rem;
+}
+
+.comment-actions button {
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: 12px;
+    color: #586069;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.comment-actions button:hover {
+    color: #0366d6;
+    text-decoration: underline;
+}
+
+.comment-actions .delete-comment:hover {
+    color: #cb2431;
+}
+
+/* Form Balasan */
+.reply-form {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: #f6f8fa;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.reply-form textarea {
+    font-size: 13px;
+    padding: 8px 12px;
+}
+
+.reply-form .btn {
+    font-size: 12px;
+    padding: 4px 12px;
+}
+
+/* Balasan Komentar */
+.replies {
+    margin-left: 3rem;
+    margin-top: 1rem;
+    padding-left: 1rem;
+    border-left: 2px solid #e1e4e8;
+}
+
+.reply-item {
+    background: #f6f8fa;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.reply-item:hover {
+    background: #f0f3f6;
+}
+
+.reply-item .comment-avatar img {
+    width: 32px;
+    height: 32px;
+}
+
+/* Animasi */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.comment-item, .reply-item {
+    animation: slideIn 0.3s ease-out;
+}
+
+/* Loading State */
+.loading {
+    position: relative;
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid #0366d6;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .comments-section {
+        padding: 1rem;
+    }
+
+    .comment-item {
+        padding: 1rem;
+    }
+
+    .replies {
+        margin-left: 1.5rem;
+    }
+
+    .comment-form textarea {
+        font-size: 16px; /* Better for mobile input */
+    }
+}
+
+/* Hover Effects */
+.comment-item:hover .comment-actions {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.comment-actions {
+    opacity: 0.7;
+    transform: translateY(5px);
+    transition: all 0.2s ease;
+}
+
+/* Custom Scrollbar */
+.comments-section::-webkit-scrollbar {
+    width: 8px;
+}
+
+.comments-section::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.comments-section::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+.comments-section::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Empty State */
+.comments-empty {
+    text-align: center;
+    padding: 3rem 0;
+    color: #586069;
+}
+
+.comments-empty p {
+    margin: 0;
+    font-size: 14px;
+}
+
+/* Focus States */
+.comment-form textarea:focus,
+.reply-form textarea:focus {
+    border-color: #0366d6;
+    box-shadow: 0 0 0 3px rgba(3, 102, 214, 0.1);
+}
+
+/* Error States */
+.error {
+    border-color: #cb2431 !important;
+}
+
+.error-message {
+    color: #cb2431;
+    font-size: 12px;
+    margin-top: 4px;
+}
+
+/* Avatar Styling */
+.comment-form-container .user-comment-info {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+    gap: 12px;
+}
+
+.comment-form-container .comment-avatar,
+.comment-main .comment-avatar,
+.reply-item .reply-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    position: relative;
+    flex-shrink: 0;
+}
+
+.comment-form-container .comment-avatar img,
+.comment-main .comment-avatar img,
+.reply-item .reply-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+/* Reply Avatar - Slightly Smaller */
+.reply-item .reply-avatar {
+    width: 35px;
+    height: 35px;
+}
+
+/* Username Styling */
+.user-comment-info .username,
+.comment-header .username {
+    font-weight: 600;
+    color: #424242;
+    font-size: 14px;
+}
+
+/* Comment Container Layout */
+.comment-main {
+    display: flex;
+    gap: 15px;
+    padding: 15px;
+    background: #fff;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Reply Container Layout */
+.reply-item {
+    display: flex;
+    gap: 12px;
+    padding: 12px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    margin: 8px 0 8px 40px;
+}
+
+/* Online Status Indicator */
+.comment-avatar::after {
+    content: '';
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    width: 8px;
+    height: 8px;
+    background: #28a745;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    display: none; /* Hidden by default */
+}
+
+.user-online .comment-avatar::after {
+    display: block; /* Show for online users */
+}
+
+/* Hover Effects */
+.comment-avatar img {
+    transition: transform 0.2s ease;
+}
+
+.comment-avatar:hover img {
+    transform: scale(1.05);
+}
+
+/* Mobile Responsive */
+@media (max-width: 576px) {
+    .comment-main {
+        padding: 12px;
+    }
+
+    .comment-form-container .comment-avatar,
+    .comment-main .comment-avatar {
+        width: 35px;
+        height: 35px;
+    }
+
+    .reply-item .reply-avatar {
+        width: 30px;
+        height: 30px;
+    }
+
+    .reply-item {
+        margin-left: 20px;
+    }
+}
+
+
+/* Loading State for Images */
+.comment-avatar.loading::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, #f0f0f0 0%, #f8f8f8 50%, #f0f0f0 100%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* Fallback Image Styling */
+.comment-avatar img[src*="default.jpg"] {
+    background: #f0f0f0;
+    padding: 5px;
 }

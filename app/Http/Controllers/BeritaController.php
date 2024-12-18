@@ -33,62 +33,78 @@ class BeritaController extends Controller
      */
     public function index()
     {
-        /*
-         *
-         * Menampilkan halaman utama daftar artikel
-         *
-         */
         try {
+            // Inisialisasi variabel dengan collection kosong sebagai default
+            $articles = collect();
+            $topArticle = null;
+            $trendingArticles = collect();
+            $popularArticles = collect();
+            $categories = collect();
+            $archives = collect();
+            $agendas = collect();
+
             // Ambil artikel teratas berdasarkan views dalam 2 minggu terakhir
             $twoWeeksAgo = now()->subWeeks(2);
-            $agendas = Agenda::all();
-            // Artikel paling populer (top 1)
-            $topArticle = Article::with(['author', 'category'])
-                ->where('status', 'published')
-                ->where('published_at', '>=', $twoWeeksAgo)
-                ->orderBy('views', 'desc')
-                ->first();
 
-            // 2 artikel trending berikutnya
-            $trendingArticles = Article::with(['author', 'category'])
-                ->where('status', 'published')
-                ->where('published_at', '>=', $twoWeeksAgo)
-                ->where('id', '!=', $topArticle ? $topArticle->id : 0)
-                ->orderBy('views', 'desc')
-                ->take(2)
-                ->get();
+            // Pastikan query dijalankan dengan proper error handling
+            try {
+                $agendas = Agenda::all() ?? collect();
 
-            // Ambil artikel yang sudah dipublish
-            $articles = Article::with(['author', 'category'])
-                ->where('status', 'published')
-                ->latest('published_at')
-                ->paginate(10);
+                // Artikel paling populer (top 1)
+                $topArticle = Article::with(['author', 'category'])
+                    ->where('status', 'published')
+                    ->where('published_at', '>=', $twoWeeksAgo)
+                    ->orderBy('views', 'desc')
+                    ->first();
 
-            // Ambil artikel populer
-            $popularArticles = Article::with(['author', 'category'])
-                ->where('status', 'published')
-                ->orderBy('views', 'desc')
-                ->take(5)
-                ->get();
+                // 2 artikel trending berikutnya
+                if ($topArticle) {
+                    $trendingArticles =
+                        Article::with(['author', 'category'])
+                            ->where('status', 'published')
+                            ->where('published_at', '>=', $twoWeeksAgo)
+                            ->where('id', '!=', $topArticle->id)
+                            ->orderBy('views', 'desc')
+                            ->take(2)
+                            ->get() ?? collect();
+                }
 
-            // Ambil semua kategori
-            $categories = categori::withCount([
-                'articles' => function ($query) {
-                    $query->where('status', 'published');
-                },
-            ])->get();
+                // Ambil artikel yang sudah dipublish
+                $articles = Article::with(['author', 'category'])
+                    ->where('status', 'published')
+                    ->latest('published_at')
+                    ->paginate(10);
 
-            // Ambil arsip artikel berdasarkan tahun dan bulan
-            $archives = Article::selectRaw(
-                'YEAR(published_at) as year,
-                                         MONTH(published_at) as month,
-                                         COUNT(*) as total'
-            )
-                ->where('status', 'published')
-                ->groupBy('year', 'month')
-                ->orderByDesc('year')
-                ->orderByDesc('month')
-                ->get();
+                // Ambil artikel populer dalam 30 hari terakhir
+                $popularArticles =
+                    Article::with(['author', 'category'])
+                        ->where('status', 'published')
+                        ->where('published_at', '>=', now()->subDays(30))
+                        ->orderBy('views', 'desc')
+                        ->take(5)
+                        ->get() ?? collect();
+
+                // Ambil semua kategori
+                $categories =
+                    categori::withCount([
+                        'articles' => function ($query) {
+                            $query->where('status', 'published');
+                        },
+                    ])->get() ?? collect();
+
+                // Ambil arsip artikel
+                $archives =
+                    Article::selectRaw(
+                        'YEAR(published_at) as year, MONTH(published_at) as month, COUNT(*) as total'
+                    )
+                        ->where('status', 'published')
+                        ->groupBy('year', 'month')
+                        ->orderByDesc('year')
+                        ->orderByDesc('month')
+                        ->get() ?? collect();
+            } catch (\Exception $e) {
+                \Log::error('Error in fetching data: ' . $e->getMessage());
+            }
 
             return view(
                 'itesa_ac_id.berita.index',
@@ -103,7 +119,6 @@ class BeritaController extends Controller
                 )
             );
         } catch (\Exception $e) {
-            // Jika terjadi error, tampilkan halaman default dengan data kosong
             \Log::error('Error in BeritaController@index: ' . $e->getMessage());
             return abort(500, 'Terjadi kesalahan saat memuat berita');
         }
@@ -113,13 +128,12 @@ class BeritaController extends Controller
     {
         try {
             // Ubah query untuk mengambil semua agenda tanpa filter status dulu
-            $agendas = Agenda::orderBy('start_date', 'desc')
-                ->get();
+            $agendas = Agenda::orderBy('start_date', 'desc')->get();
 
             // Tambahkan debug logging
             \Log::info('Debug Agenda:', [
                 'count' => $agendas->count(),
-                'data' => $agendas->toArray()
+                'data' => $agendas->toArray(),
             ]);
 
             // Ambil artikel populer untuk sidebar
@@ -133,19 +147,20 @@ class BeritaController extends Controller
             $categories = categori::withCount([
                 'articles' => function ($query) {
                     $query->where('status', 'published');
-                }
+                },
             ])->get();
 
-            return view('itesa_ac_id.berita.show_agenda', compact(
-                'agendas',
-                'popularArticles',
-                'categories'
-            ));
-
+            return view(
+                'itesa_ac_id.berita.show_agenda',
+                compact('agendas', 'popularArticles', 'categories')
+            );
         } catch (\Exception $e) {
             \Log::error('Error in agendaShow: ' . $e->getMessage());
             \Log::error('Stack trace: ' . $e->getTraceAsString());
-            return back()->with('error', 'Terjadi kesalahan saat memuat agenda');
+            return back()->with(
+                'error',
+                'Terjadi kesalahan saat memuat agenda'
+            );
         }
     }
 
@@ -165,6 +180,13 @@ class BeritaController extends Controller
                 ->where('status', 'published')
                 ->firstOrFail();
 
+            $comments = $article
+                ->comments()
+                ->with(['user', 'replies.user'])
+                ->whereNull('parent_id') // Hanya komentar utama
+                ->orderBy('created_at', 'desc')
+                ->get();
+            $comments = $comments ?? collect();
             // Increment view count
             $article->increment('views');
 
@@ -172,15 +194,18 @@ class BeritaController extends Controller
             $allCategories = categori::withCount([
                 'articles' => function ($query) {
                     $query->where('status', 'published');
-                }
+                },
             ])->get();
 
             // Artikel terkait (dari kategori yang sama)
             $relatedArticles = Article::with(['author', 'categories'])
                 ->where('status', 'published')
                 ->where('id', '!=', $article->id)
-                ->whereHas('categories', function($query) use ($article) {
-                    $query->whereIn('categories.id', $article->categories->pluck('id'));
+                ->whereHas('categories', function ($query) use ($article) {
+                    $query->whereIn(
+                        'categories.id',
+                        $article->categories->pluck('id')
+                    );
                 })
                 ->latest('published_at')
                 ->take(5)
@@ -198,8 +223,11 @@ class BeritaController extends Controller
             $recommendedArticles = Article::with(['author', 'categories'])
                 ->where('status', 'published')
                 ->where('id', '!=', $article->id)
-                ->whereHas('categories', function($query) use ($article) {
-                    $query->whereIn('categories.id', $article->categories->pluck('id'));
+                ->whereHas('categories', function ($query) use ($article) {
+                    $query->whereIn(
+                        'categories.id',
+                        $article->categories->pluck('id')
+                    );
                 })
                 ->inRandomOrder()
                 ->take(5)
@@ -214,33 +242,42 @@ class BeritaController extends Controller
                 ->get();
 
             // Kategori populer dengan artikel terpopulernya
-            $popularCategories = categori::withCount(['articles' => function($query) {
-                $query->where('status', 'published');
-            }])
-            ->having('articles_count', '>', 0)
-            ->orderByDesc('articles_count')
-            ->take(5)
-            ->get()
-            ->each(function($category) {
-                $category->popular_articles = Article::where('status', 'published')
-                    ->whereHas('categories', function($query) use ($category) {
-                        $query->where('categories.id', $category->id);
-                    })
-                    ->orderByDesc('views')
-                    ->take(3)
-                    ->get();
-            });
-
-            return view('itesa_ac_id.berita.show', compact(
-                'article',
-                'allCategories',
-                'relatedArticles',
-                'latestArticles',
-                'recommendedArticles',
-                'weeklyTopArticles',
-                'popularCategories'
-            ));
-
+            $popularCategories = categori::withCount([
+                'articles' => function ($query) {
+                    $query->where('status', 'published');
+                },
+            ])
+                ->having('articles_count', '>', 0)
+                ->orderByDesc('articles_count')
+                ->take(5)
+                ->get()
+                ->each(function ($category) {
+                    $category->popular_articles = Article::where(
+                        'status',
+                        'published'
+                    )
+                        ->whereHas('categories', function ($query) use (
+                            $category
+                        ) {
+                            $query->where('categories.id', $category->id);
+                        })
+                        ->orderByDesc('views')
+                        ->take(3)
+                        ->get();
+                });
+            return view(
+                'itesa_ac_id.berita.show',
+                compact(
+                    'article',
+                    'allCategories',
+                    'relatedArticles',
+                    'latestArticles',
+                    'recommendedArticles',
+                    'weeklyTopArticles',
+                    'popularCategories',
+                    'comments'
+                )
+            );
         } catch (\Exception $e) {
             \Log::error('Error in show article: ' . $e->getMessage());
             return redirect()
@@ -294,11 +331,12 @@ class BeritaController extends Controller
                     ];
                 });
 
-            // Ambil artikel populer
-            $popularArticles = Article::where('status', 'published')
-                ->whereNotNull('published_at')
-                ->orderByDesc('views')
-                ->limit(5)
+            // Ambil artikel populer dalam 30 hari terakhir
+            $popularArticles = Article::with(['author', 'category'])
+                ->where('status', 'published')
+                ->where('published_at', '>=', now()->subDays(30))
+                ->orderBy('views', 'desc')
+                ->take(5)
                 ->get();
 
             // Query pencarian artikel
@@ -366,13 +404,10 @@ class BeritaController extends Controller
 
             $articles = $articlesQuery->paginate(10);
 
-            // Ambil artikel populer
-            $popularArticles = Article::with(['author', 'categories'])
-                ->whereHas('categories', function ($query) use ($category) {
-                    $query->where('categories.id', $category->id);
-                })
+            // Ambil artikel populer dalam 30 hari terakhir
+            $popularArticles = Article::with(['author', 'category'])
                 ->where('status', 'published')
-                ->whereNotNull('published_at')
+                ->where('published_at', '>=', now()->subDays(30))
                 ->orderBy('views', 'desc')
                 ->take(5)
                 ->get();
@@ -412,14 +447,6 @@ class BeritaController extends Controller
                     ];
                 });
 
-            // \Log::info('Articles found:', [
-            //     'category_id' => $category->id,
-            //     'category_name' => $category->name,
-            //     'total_articles' => $articles->total(),
-            //     'current_page' => $articles->currentPage(),
-            //     'per_page' => $articles->perPage(),
-            // ]);
-
             return view('itesa_ac_id.berita.menu', [
                 'articles' => $articles,
                 'category' => $category,
@@ -455,8 +482,10 @@ class BeritaController extends Controller
                 ->latest('published_at')
                 ->paginate(10);
 
+            // Ambil artikel populer dalam 30 hari terakhir
             $popularArticles = Article::with(['author', 'category'])
                 ->where('status', 'published')
+                ->where('published_at', '>=', now()->subDays(30))
                 ->orderBy('views', 'desc')
                 ->take(5)
                 ->get();

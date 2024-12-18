@@ -30,8 +30,8 @@
                         @endif
                     </div>
                     <div class="content-result-search-item-content">
-                        <h2>{{ $article->title }}</h2>
-                        <p>{{ Str::limit(strip_tags($article->content), 200) }}</p>
+                        <h2>{!! Str::limit(strip_tags($article->title), 250, '...') !!}</h2>
+                        <p>{!! Str::limit(strip_tags($article->content), 200, '...') !!}</p>
                         <a href="{{ route('berita.show', $article->slug) }}" class="read-more">Selengkapnya</a>
                     </div>
                 </div>
@@ -56,7 +56,7 @@
                         style="text-decoration: none; color: inherit;">
                         <span class="number">{{ str_pad($loop->iteration, 2, '0', STR_PAD_LEFT) }}</span>
                         <div class="popular-content">
-                            <h4>{{ $popularArticle->title }}</h4>
+                            <h4>{!! Str::limit(strip_tags($popularArticle->title), 20, '...') !!}</h4>
                             <span class="views">{{ number_format($popularArticle->views) }} views</span>
                         </div>
                     </a>

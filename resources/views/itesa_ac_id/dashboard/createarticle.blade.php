@@ -113,7 +113,7 @@
         <div class="mb-6">
             <label class="block text-sm font-medium text-gray-700 mb-2">Thumbnail</label>
             <div class="flex items-center justify-center w-full">
-                <div id="dropZone" class="flex flex-col w-full h-64 md:h-72 lg:h-80 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer hover:bg-gray-50 transition-all duration-200 relative overflow-hidden">
+                <div id="dropZone" class="flex flex-col w-full  md:h-72 lg:h-80 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer hover:bg-gray-50 transition-all duration-200 relative overflow-hidden">
                     <!-- Preview Container -->
                     <div id="previewContainer" class="hidden w-full h-full bg-gray-100">
                         <div class="relative w-full h-full flex items-center justify-center">
@@ -125,7 +125,7 @@
                             <!-- Tombol hapus -->
                             <button type="button"
                                     id="removeImage"
-                                    class="absolute top-2 right-2 bg-red-500 text-white rounded-full p-2 hover:bg-red-600 transition-colors duration-200 shadow-lg opacity-90 hover:opacity-100">
+                                    class="absolute top-0 right-0 bg-red-500 text-white rounded-full p-2 hover:bg-red-600 transition-colors duration-200 shadow-lg opacity-90 hover:opacity-100">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                                 </svg>
@@ -341,4 +341,3 @@
 </script>
 @endpush
 @endsection
-

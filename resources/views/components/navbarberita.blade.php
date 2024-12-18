@@ -44,7 +44,38 @@
                 </div>
 
                 <div class="nav-actions">
-                    <a href="{{ route('login') }}" class="btn-login">Masuk</a>
+                    @auth
+                        <div class="user-profile dropdown">
+                            <button type="button" class="dropdown-toggle" onclick="toggleDropdown(this)">
+                                @if(Auth::user()->profile_photo)
+                                    <img src="{{ asset('storage/profile_photos/' . Auth::user()->profile_photo) ?? asset('./lib/default_media/default.jpg')}}" alt="Profile" class="profile-photo">
+                                @else
+                                    <img src="{{ asset('lib/default_media/default.jpg') }}" alt="Default Profile" class="profile-photo">
+                                @endif
+                                <span class="user-name">{{ Auth::user()->name }}</span>
+                            </button>
+                            <div class="dropdown-menu">
+                                @if (Auth::user()->role === 'admin')
+                                    <li><a href="{{ route('admin.dashboard') }}">Dashboard</a></li>
+                                    <li class="dropdown-divider"></li>
+                                @else
+                                    <li><a href="{{ route('user.profile') }}">Profil Saya</a></li>
+                                    <li><a href="{{ route('user.comments') }}">Komentar Saya</a></li>
+                                    <li><a href="{{ route('user.bookmarks') }}">Bookmark</a></li>
+                                    <li class="dropdown-divider"></li>
+                                @endif
+                                <li>
+                                    <form action="{{ route('logout') }}" method="POST">
+                                        @csrf
+                                        <button type="submit" class="dropdown-btn">Logout</button>
+                                    </form>
+                                </li>
+                            </div>
+                        </div>
+                    @else
+                        <a href="{{ route('login') }}" class="btn-login">Masuk</a>
+                    @endauth
+
                     <button class="menu-toggle" aria-label="Toggle Menu">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50" width="50px" height="50px">
                             <path
@@ -66,7 +97,9 @@
                 <li><a href="#">Kerjasama</a></li>
                 <li><a href="#">Inovasi</a></li>
                 <li><a href="#">Kontak</a></li>
-                <li><a href="{{ route('login') }}" class="sidebar-login">Masuk</a></li>
+                @if(!Auth::user())
+                <li><a href="{{ route('login') }}">login</a></li>
+                @endif
             </ul>
         </div>
     </nav>

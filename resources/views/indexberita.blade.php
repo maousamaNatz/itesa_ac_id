@@ -11,7 +11,6 @@
 <body>
     @include('components.navbarberita')
     <div class="container">
-
         <!-- Main Content Grid -->
         @yield('content')
     </div>

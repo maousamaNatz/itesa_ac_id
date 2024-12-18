@@ -24,6 +24,9 @@ use App\Traits\NotificationHandlerTrait;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 
 class DashboardController extends Controller
 {
@@ -92,7 +95,47 @@ class DashboardController extends Controller
             \Log::info('Article request data:', $request->all());
 
             $validated = $request->validate([
-                'title' => 'required|max:255',
+                'title' => [
+                    'required',
+                    'max:255',
+                    'regex:/^[a-zA-Z0-9\s\-_.,!?()\'\"]+$/u', // Hanya izinkan karakter yang masuk akal
+                    function ($attribute, $value, $fail) {
+                        // Cek panjang kata terpanjang
+                        $words = explode(' ', $value);
+                        $maxWordLength = max(array_map('strlen', $words));
+
+                        if ($maxWordLength > 30) {
+                            $fail(
+                                'Judul mengandung kata yang terlalu panjang (maksimal 30 karakter per kata).'
+                            );
+                        }
+
+                        // Cek persentase huruf berulang
+                        $chars = str_split(strtolower($value));
+                        $charCount = array_count_values($chars);
+                        $totalChars = strlen($value);
+
+                        foreach ($charCount as $char => $count) {
+                            if ($count > $totalChars * 0.4) {
+                                // Jika satu karakter muncul lebih dari 40%
+                                $fail(
+                                    'Judul mengandung terlalu banyak karakter berulang.'
+                                );
+                            }
+                        }
+
+                        // Cek pola berulang
+                        $repeatingPattern = preg_match(
+                            '/(.+?)\1{2,}/i',
+                            $value
+                        );
+                        if ($repeatingPattern) {
+                            $fail(
+                                'Judul mengandung pola karakter yang berulang.'
+                            );
+                        }
+                    },
+                ],
                 'content' => 'required',
                 'thumbnail' => 'required|image|mimes:jpeg,png,jpg|max:2048',
                 'meta_title' => 'nullable|max:255',
@@ -101,7 +144,7 @@ class DashboardController extends Controller
                 'category_ids' => 'required|array',
                 'category_ids.*' => 'exists:categories,id',
                 'status' => 'required|in:draft,published',
-                'tags' => 'required|string'
+                'tags' => 'required|string',
             ]);
 
             // Log data yang sudah divalidasi
@@ -113,9 +156,11 @@ class DashboardController extends Controller
             $thumbnailPath = null;
             if ($request->hasFile('thumbnail')) {
                 \Log::info('Upload attempt:', [
-                    'original_name' => $request->file('thumbnail')->getClientOriginalName(),
+                    'original_name' => $request
+                        ->file('thumbnail')
+                        ->getClientOriginalName(),
                     'mime_type' => $request->file('thumbnail')->getMimeType(),
-                    'size' => $request->file('thumbnail')->getSize()
+                    'size' => $request->file('thumbnail')->getSize(),
                 ]);
 
                 $thumbnailPath = $this->handleMediaUpload(
@@ -141,8 +186,9 @@ class DashboardController extends Controller
                 'author_id' => auth()->id(),
                 'category_id' => $request->category_ids[0],
                 'status' => $request->status,
-                'published_at' => $request->status === 'published' ? now() : null,
-                'views' => 0
+                'published_at' =>
+                    $request->status === 'published' ? now() : null,
+                'views' => 0,
             ]);
 
             // Handle tags
@@ -155,7 +201,7 @@ class DashboardController extends Controller
                     $tagName = trim($tagName);
                     $tag = Tag::firstOrCreate([
                         'name' => $tagName,
-                        'slug' => Str::slug($tagName)
+                        'slug' => Str::slug($tagName),
                     ]);
                     $tagIds[] = $tag->id;
                 }
@@ -174,9 +220,9 @@ class DashboardController extends Controller
                 ->with('notification', [
                     'type' => 'success',
                     'title' => 'Berhasil!',
-                    'message' => 'Artikel berhasil ditambahkan dengan thumbnail.'
+                    'message' =>
+                        'Artikel berhasil ditambahkan dengan thumbnail.',
                 ]);
-
         } catch (\Exception $e) {
             DB::rollBack();
 
@@ -187,7 +233,7 @@ class DashboardController extends Controller
 
             \Log::error('Error in storeArticle:', [
                 'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
             return back()
@@ -195,7 +241,7 @@ class DashboardController extends Controller
                 ->with('notification', [
                     'type' => 'error',
                     'title' => 'Error!',
-                    'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+                    'message' => 'Terjadi kesalahan: ' . $e->getMessage(),
                 ]);
         }
     }
@@ -220,10 +266,7 @@ class DashboardController extends Controller
     public function editcategory(categori $category)
     {
         $categories = Category::all();
-        return view(
-        'itesa_ac_id.dashboard.editcategory',
-            compact('category')
-        );
+        return view('itesa_ac_id.dashboard.editcategory', compact('category'));
     }
     /**
      * Show all comments
@@ -268,7 +311,6 @@ class DashboardController extends Controller
         );
     }
 
-
     /**
      * Display the specified resource.
      */
@@ -277,8 +319,8 @@ class DashboardController extends Controller
         try {
             // Ambil artikel tanpa memandang status
             $article = Article::with(['author', 'category', 'categories'])
-                            ->where('slug', $slug)
-                            ->firstOrFail();
+                ->where('slug', $slug)
+                ->firstOrFail();
 
             // Jika artikel published, redirect ke halaman publik
             if ($article->status === 'published') {
@@ -286,10 +328,14 @@ class DashboardController extends Controller
             }
 
             // Jika draft, tampilkan preview
-            return view('itesa_ac_id.dashboard.preview-article', compact('article'));
-
+            return view(
+                'itesa_ac_id.dashboard.preview-article',
+                compact('article')
+            );
         } catch (\Exception $e) {
-            \Log::error('Error di DashboardController@show: ' . $e->getMessage());
+            \Log::error(
+                'Error di DashboardController@show: ' . $e->getMessage()
+            );
             return redirect()
                 ->route('admin.article')
                 ->with('error', 'Artikel tidak ditemukan.');
@@ -310,7 +356,7 @@ class DashboardController extends Controller
             return back()->with('notification', [
                 'type' => 'error',
                 'title' => 'Error!',
-                'message' => 'Terjadi kesalahan saat memuat data agenda'
+                'message' => 'Terjadi kesalahan saat memuat data agenda',
             ]);
         }
     }
@@ -323,7 +369,7 @@ class DashboardController extends Controller
                 'start_date' => 'required|date',
                 'end_date' => 'required|date|after_or_equal:start_date',
                 'location' => 'required|string|max:255',
-                'status' => 'required|in:active,inactive'
+                'status' => 'required|in:active,inactive',
             ]);
 
             // Tambahkan created_by dari user yang sedang login
@@ -340,9 +386,8 @@ class DashboardController extends Controller
                 ->with('notification', [
                     'type' => 'success',
                     'title' => 'Berhasil!',
-                    'message' => 'Agenda berhasil ditambahkan'
+                    'message' => 'Agenda berhasil ditambahkan',
                 ]);
-
         } catch (\Exception $e) {
             DB::rollBack();
             \Log::error('Error in storeAgenda: ' . $e->getMessage());
@@ -351,7 +396,7 @@ class DashboardController extends Controller
                 ->with('notification', [
                     'type' => 'error',
                     'title' => 'Error!',
-                    'message' => 'Terjadi kesalahan saat menyimpan agenda'
+                    'message' => 'Terjadi kesalahan saat menyimpan agenda',
                 ]);
         }
     }
@@ -366,7 +411,7 @@ class DashboardController extends Controller
                 ->with('notification', [
                     'type' => 'error',
                     'title' => 'Error!',
-                    'message' => 'Terjadi kesalahan saat memuat data agenda'
+                    'message' => 'Terjadi kesalahan saat memuat data agenda',
                 ]);
         }
     }
@@ -379,7 +424,7 @@ class DashboardController extends Controller
                 'start_date' => 'required|date',
                 'end_date' => 'required|date|after_or_equal:start_date',
                 'location' => 'required|string|max:255',
-                'status' => 'required|in:active,inactive'
+                'status' => 'required|in:active,inactive',
             ]);
 
             DB::beginTransaction();
@@ -394,9 +439,8 @@ class DashboardController extends Controller
                 ->with('notification', [
                     'type' => 'success',
                     'title' => 'Berhasil!',
-                    'message' => 'Agenda berhasil diperbarui'
+                    'message' => 'Agenda berhasil diperbarui',
                 ]);
-
         } catch (\Exception $e) {
             DB::rollBack();
             \Log::error('Error in updateAgenda: ' . $e->getMessage());
@@ -405,7 +449,7 @@ class DashboardController extends Controller
                 ->with('notification', [
                     'type' => 'error',
                     'title' => 'Error!',
-                    'message' => 'Terjadi kesalahan saat memperbarui agenda'
+                    'message' => 'Terjadi kesalahan saat memperbarui agenda',
                 ]);
         }
     }
@@ -419,15 +463,14 @@ class DashboardController extends Controller
                 ->with('notification', [
                     'type' => 'success',
                     'title' => 'Berhasil!',
-                    'message' => 'Agenda berhasil dihapus'
+                    'message' => 'Agenda berhasil dihapus',
                 ]);
-
         } catch (\Exception $e) {
             \Log::error('Error in destroyAgenda: ' . $e->getMessage());
             return back()->with('notification', [
                 'type' => 'error',
                 'title' => 'Error!',
-                'message' => 'Terjadi kesalahan saat menghapus agenda'
+                'message' => 'Terjadi kesalahan saat menghapus agenda',
             ]);
         }
     }
@@ -436,7 +479,10 @@ class DashboardController extends Controller
         try {
             $article = Article::findOrFail($article);
             // Hapus thumbnail jika ada
-            if ($article->thumbnail && Storage::disk('public')->exists($article->thumbnail)) {
+            if (
+                $article->thumbnail &&
+                Storage::disk('public')->exists($article->thumbnail)
+            ) {
                 Storage::disk('public')->delete($article->thumbnail);
             }
 
@@ -451,16 +497,15 @@ class DashboardController extends Controller
                 ->with('notification', [
                     'type' => 'success',
                     'title' => 'Berhasil!',
-                    'message' => 'Artikel berhasil dihapus'
+                    'message' => 'Artikel berhasil dihapus',
                 ]);
-
         } catch (\Exception $e) {
             \Log::error('Error saat menghapus artikel: ' . $e->getMessage());
 
             return back()->with('notification', [
                 'type' => 'error',
                 'title' => 'Error!',
-                'message' => 'Gagal menghapus artikel: ' . $e->getMessage()
+                'message' => 'Gagal menghapus artikel: ' . $e->getMessage(),
             ]);
         }
     }
@@ -470,7 +515,10 @@ class DashboardController extends Controller
         try {
             // Cek apakah kategori memiliki artikel
             if ($category->articles()->count() > 0) {
-                return back()->with('error', 'Kategori tidak dapat dihapus karena masih memiliki artikel terkait.');
+                return back()->with(
+                    'error',
+                    'Kategori tidak dapat dihapus karena masih memiliki artikel terkait.'
+                );
             }
 
             $category->delete();
@@ -479,7 +527,10 @@ class DashboardController extends Controller
                 ->with('success', 'Kategori berhasil dihapus');
         } catch (\Exception $e) {
             \Log::error('Error in deletecategory: ' . $e->getMessage());
-            return back()->with('error', 'Terjadi kesalahan saat menghapus kategori');
+            return back()->with(
+                'error',
+                'Terjadi kesalahan saat menghapus kategori'
+            );
         }
     }
 
@@ -489,7 +540,7 @@ class DashboardController extends Controller
             $validated = $request->validate([
                 'name' => 'required|max:255',
                 'description' => 'nullable',
-                'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048'
+                'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             ]);
 
             // Generate unique slug
@@ -509,7 +560,9 @@ class DashboardController extends Controller
             $category->description = $validated['description'] ?? null;
 
             if ($request->hasFile('image')) {
-                $imagePath = $request->file('image')->store('categories', 'public');
+                $imagePath = $request
+                    ->file('image')
+                    ->store('categories', 'public');
                 $category->image = $imagePath;
             }
 
@@ -536,8 +589,10 @@ class DashboardController extends Controller
             $categories = categori::orderBy('name')->get();
 
             // Tampilkan view dengan data artikel dan kategori
-            return view('itesa_ac_id.dashboard.editarticle', compact('article', 'categories'));
-
+            return view(
+                'itesa_ac_id.dashboard.editarticle',
+                compact('article', 'categories')
+            );
         } catch (\Exception $e) {
             \Log::error('Error in editarticle: ' . $e->getMessage());
 
@@ -546,7 +601,8 @@ class DashboardController extends Controller
                 ->with('notification', [
                     'type' => 'error',
                     'title' => 'Error!',
-                    'message' => 'Artikel tidak ditemukan atau terjadi kesalahan'
+                    'message' =>
+                        'Artikel tidak ditemukan atau terjadi kesalahan',
                 ]);
         }
     }
@@ -559,14 +615,54 @@ class DashboardController extends Controller
 
             // Validasi request
             $validated = $request->validate([
-                'title' => 'required|max:255',
+                'title' => [
+                    'required',
+                    'max:255',
+                    // 'regex:/^[a-zA-Z0-9\s\-_.,!?()\'\"]+$/u',
+                    function ($attribute, $value, $fail) {
+                        // Cek panjang kata terpanjang
+                        $words = explode(' ', $value);
+                        $maxWordLength = max(array_map('strlen', $words));
+
+                        if ($maxWordLength > 30) {
+                            $fail(
+                                'Judul mengandung kata yang terlalu panjang (maksimal 30 karakter per kata).'
+                            );
+                        }
+
+                        // Cek persentase huruf berulang
+                        $lettersOnly = preg_replace('/[^a-z]/i', '', $value); // Hanya huruf alfabet
+                        $chars = str_split(strtolower($lettersOnly));
+                        $charCount = array_count_values($chars);
+                        $totalChars = strlen($lettersOnly);
+
+                        foreach ($charCount as $char => $count) {
+                            if ($count > $totalChars * 0.4) {
+                                $fail(
+                                    'Judul mengandung terlalu banyak karakter berulang.'
+                                );
+                            }
+                        }
+
+                        // Cek pola berulang (misalnya lebih dari 3 pengulangan)
+                        $repeatingPattern = preg_match(
+                            '/(\b\w{1,10}\b)(?:.*?\1){3,}/i',
+                            $value
+                        );
+                        if ($repeatingPattern) {
+                            $fail(
+                                'Judul mengandung pola kata yang berulang terlalu banyak.'
+                            );
+                        }
+                    },
+                ],
                 'content' => 'required',
                 'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
                 'meta_title' => 'nullable|max:255',
                 'meta_description' => 'nullable',
                 'category_ids' => 'required|array',
                 'category_ids.*' => 'exists:categories,id',
-                'status' => 'required|in:draft,published'
+                'status' => 'required|in:draft,published',
             ]);
 
             DB::beginTransaction();
@@ -574,8 +670,11 @@ class DashboardController extends Controller
             // Update artikel yang sudah ada
             $article->title = $validated['title'];
             $article->content = $validated['content'];
-            $article->meta_title = $validated['meta_title'] ?? $validated['title'];
-            $article->meta_description = $validated['meta_description'] ?? Str::limit(strip_tags($validated['content']), 160);
+            $article->meta_title =
+                $validated['meta_title'] ?? $validated['title'];
+            $article->meta_description =
+                $validated['meta_description'] ??
+                Str::limit(strip_tags($validated['content']), 160);
             $article->category_id = $validated['category_ids'][0];
             $article->status = $validated['status'];
             $article->author_id = auth()->id();
@@ -586,7 +685,11 @@ class DashboardController extends Controller
                 $baseSlug = $slug;
                 $counter = 1;
 
-                while (Article::where('slug', $slug)->where('id', '!=', $article->id)->exists()) {
+                while (
+                    Article::where('slug', $slug)
+                        ->where('id', '!=', $article->id)
+                        ->exists()
+                ) {
                     $slug = $baseSlug . '-' . $counter;
                     $counter++;
                 }
@@ -599,12 +702,17 @@ class DashboardController extends Controller
                 if ($article->thumbnail) {
                     Storage::disk('public')->delete($article->thumbnail);
                 }
-                $thumbnailPath = $request->file('thumbnail')->store('articles/thumbnails', 'public');
+                $thumbnailPath = $request
+                    ->file('thumbnail')
+                    ->store('articles/thumbnails', 'public');
                 $article->thumbnail = $thumbnailPath;
             }
 
             // Update published_at jika status berubah menjadi published
-            if ($validated['status'] === 'published' && !$article->published_at) {
+            if (
+                $validated['status'] === 'published' &&
+                !$article->published_at
+            ) {
                 $article->published_at = now();
             }
 
@@ -620,9 +728,8 @@ class DashboardController extends Controller
                 ->with('notification', [
                     'type' => 'success',
                     'title' => 'Berhasil!',
-                    'message' => 'Artikel berhasil diperbarui.'
+                    'message' => 'Artikel berhasil diperbarui.',
                 ]);
-
         } catch (\Exception $e) {
             DB::rollBack();
             \Log::error('Error in updatearticle: ' . $e->getMessage());
@@ -631,8 +738,132 @@ class DashboardController extends Controller
                 ->with('notification', [
                     'type' => 'error',
                     'title' => 'Error!',
-                    'message' => 'Terjadi kesalahan saat memperbarui artikel: ' . $e->getMessage()
+                    'message' =>
+                        'Terjadi kesalahan saat memperbarui artikel: ' .
+                        $e->getMessage(),
                 ]);
+        }
+    }
+    public function destroycomment(Comment $comment)
+    {
+        $comment->delete();
+        return redirect()
+            ->back()
+            ->with('notification', [
+                'type' => 'success',
+                'title' => 'Berhasil!',
+                'message' => 'Komentar berhasil dihapus.',
+            ]);
+    }
+
+    /**
+     * Menampilkan profil pengguna.
+     */
+    public function showProfile()
+    {
+        $user = Auth::user();
+        $articles = Article::where('author_id', $user->id)->paginate(4);
+        return view('itesa_ac_id.dashboard.profile', compact('user', 'articles'));
+    }
+
+    public function editProfile()
+    {
+        $user = Auth::user();
+        // Cek apakah kolom views ada
+        $totalViews = Article::sum('views');
+        return view('itesa_ac_id.dashboard.editProfile', compact('user'));
+    }
+
+    public function updateProfile(Request $request)
+    {
+        $user = Auth::user();
+
+        // Validasi input
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'password' => 'nullable|string|min:8|confirmed',
+            'bio' => 'nullable|string|max:255',
+        ]);
+
+        // Update data pengguna
+        $user->username = $request->input('name'); // Gunakan 'username' jika 'name' tidak ada
+        $user->email = $request->input('email');
+
+        if ($request->filled('password')) {
+            $user->password = Hash::make($request->input('password'));
+        }
+
+        $user->bio = $request->input('bio');
+
+        $user->save();
+
+        return response()->json(['success' => true]);
+    }
+
+    public function updateImgs(Request $request)
+    {
+        try {
+            $user = Auth::user();
+
+            \Log::info('Request data:', [
+                'hasFile' => $request->hasFile('profile_image'),
+                'allFiles' => $request->allFiles(),
+                'all' => $request->all()
+            ]);
+
+            $validator = Validator::make($request->all(), [
+                'profile_image' => 'required|image|mimes:jpeg,png,jpg|max:2048'
+            ], [
+                'profile_image.required' => 'File foto profil harus dipilih',
+                'profile_image.image' => 'File harus berupa gambar',
+                'profile_image.mimes' => 'Format file harus jpeg, png, atau jpg',
+                'profile_image.max' => 'Ukuran file maksimal 2MB'
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $validator->errors()->first(),
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+
+            $image = $request->file('profile_image');
+            $imageName = time() . '_' . Str::random(10) . '.' . $image->getClientOriginalExtension();
+
+            // Buat direktori jika belum ada
+            $path = public_path('storage/profile_photos');
+            if (!File::isDirectory($path)) {
+                File::makeDirectory($path, 0777, true, true);
+            }
+
+            // Hapus foto lama jika ada
+            if ($user->profile_photo && File::exists(public_path('storage/profile_photos/' . $user->profile_photo))) {
+                File::delete(public_path('storage/profile_photos/' . $user->profile_photo));
+            }
+
+            // Simpan file baru ke public storage
+            $image->move(public_path('storage/profile_photos'), $imageName);
+
+            // Update database
+            $user->profile_photo = $imageName;
+            $user->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Foto profil berhasil diperbarui',
+                'photo_url' => asset('storage/profile_photos/' . $imageName)
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Error saat update foto profil: ' . $e->getMessage());
+            \Log::error('Stack trace: ' . $e->getTraceAsString());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat memperbarui foto profil: ' . $e->getMessage()
+            ], 500);
         }
     }
 }

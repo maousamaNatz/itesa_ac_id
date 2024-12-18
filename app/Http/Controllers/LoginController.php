@@ -34,28 +34,39 @@ class LoginController extends Controller
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
 
+            // Cek role user
             if (Auth::user()->role === 'admin') {
+                // Set session untuk admin
+                session([
+                    'is_admin' => true,
+                    'role' => 'admin',
+                    'user_id' => Auth::id()
+                ]);
+
                 return redirect()->route('admin.dashboard')->with('notification', [
                     'type' => 'success',
                     'title' => 'Login Berhasil!',
                     'message' => 'Selamat datang di Dashboard Admin'
                 ]);
-            }
+            } else {
+                // Set session untuk user biasa
+                session([
+                    'is_admin' => false,
+                    'role' => 'user',
+                    'user_id' => Auth::id()
+                ]);
 
-            return redirect()->intended('/')->with('notification', [
-                'type' => 'success',
-                'title' => 'Login Berhasil!',
-                'message' => 'Selamat datang kembali'
-            ]);
+                return redirect()->intended('/')->with('notification', [
+                    'type' => 'success',
+                    'title' => 'Login Berhasil!',
+                    'message' => 'Selamat datang kembali'
+                ]);
+            }
         }
 
         return back()->withErrors([
             'email' => 'Email atau password salah.',
-        ])->withInput()->with('notification', [
-            'type' => 'error',
-            'title' => 'Login Gagal!',
-            'message' => 'Email atau password yang Anda masukkan salah'
-        ]);
+        ])->withInput();
     }
 
     public function logout(Request $request)

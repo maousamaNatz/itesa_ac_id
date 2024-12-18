@@ -1,5 +1,27 @@
 {
     "private": true,
+    "name": "itesa-ac-id",
+    "version": "1.0.0",
+    "type": "module",
+    "author": {
+        "author1": {
+            "name": "Ridho Toti febianto",
+            "email": "ridhototi@gmail.com",
+            "url": "https://github.com/SkyyDcode",
+            "role": "Frontend fakultas"
+        },
+        "author2": {
+            "name": "Natanael Ben Iriyanto (Natzsixn)",
+            "email": "natzsixnismynames@gmail.com",
+            "url": "https://github.com/maousamanatz",
+            "role": "Frontend Dashboard Itesa.ac.id, Frontends Berita itesa.ac.id, Backend project itesa.ac.id"
+        },
+        "author3": {
+            "name": "Haidar rifky andriano",
+            "email": "haidar.rifky.andriano@gmail.com",
+            "url": "https://github.com/Hackivers"
+        }
+    },
     "scripts": {
         "dev": "vite",
         "build": "vite build"
@@ -12,6 +34,7 @@
         "vite": "^4.5.5"
     },
     "dependencies": {
+        "sweetalert2": "^11.14.5",
         "tinymce": "^7.5.1"
     }
 }

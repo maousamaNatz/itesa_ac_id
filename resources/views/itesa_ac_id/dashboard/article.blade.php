@@ -90,11 +90,22 @@
                                                 {{ $article->title }}
                                             </span>
                                         </div>
-                                        <div
-                                            class="w-max-[200px] flex-nowrap flex gap-2 overflow-hidden whitespace-nowrap text-nowrap elipsis">
-                                            @foreach ($article->tags as $tag)
-                                                <div class="text-sm text-gray-500">#{{ $tag->name }}</div>
-                                            @endforeach
+                                        <div class="w-max-[200px] flex flex-wrap gap-2 relative group">
+                                            <div class="limited-text">
+                                                @foreach ($article->tags as $tag)
+                                                    <div class="text-sm text-gray-500 truncate hover:overflow-visible"
+                                                        data-original-text="#{{ $tag->name }}"
+                                                        title="#{{ $tag->name }}">
+                                                        #{{ $tag->name }}
+                                                    </div>
+                                                  @endforeach
+                                            </div>
+
+                                            @if (count($article->tags) > 3)
+                                                <div class="text-sm text-gray-400">
+                                                    +{{ count($article->tags) - 3 }} more
+                                                </div>
+                                            @endif
                                         </div>
                                     </div>
                                 </div>
@@ -150,12 +161,11 @@
                                         </a>
                                     @endif
 
-                                    <form action="{{ route('admin.article.destroy', $article->id) }}" method="POST">
+                                    <form action="{{ route('admin.article.destroy', $article->id) }}" method="POST" class="inline delete-form">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="btn btn-danger"
-                                            onclick="return confirm('Apakah Anda yakin ingin menghapus artikel ini?')">
-                                            Hapus
+                                        <button type="button" class="text-red-600 hover:text-red-900 delete-btn">
+                                            <i class="fas fa-trash"></i>
                                         </button>
                                     </form>
                                 </div>
@@ -185,4 +195,17 @@
     </div>
     <script src="{{ asset('lib/js/filter.js') }}"></script>
     <script src="{{ asset('lib/js/filterarticle.js') }}"></script>
+
+    @push('scripts')
+    <script>
+        // Pass notification data dari server ke JavaScript
+        @if(session('notification'))
+            const serverNotification = @json(session('notification'));
+        @endif
+
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeDeleteHandlers();
+        });
+    </script>
+    @endpush
 @endsection

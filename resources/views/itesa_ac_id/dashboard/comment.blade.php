@@ -30,7 +30,7 @@
             <tbody class="divide-y divide-gray-200">
                 @forelse($comments as $comment)
                 <tr>
-                    <td class="px-6 py-4">{{ $comment->user->name }}</td>
+                    <td class="px-6 py-4">{{ $comment->user->username }}</td>
                     <td class="px-6 py-4">{{ Str::limit($comment->article->title, 50) }}</td>
                     <td class="px-6 py-4">{{ Str::limit($comment->content, 100) }}</td>
                     <td class="px-6 py-4">{{ $comment->created_at->format('d M Y H:i') }}</td>

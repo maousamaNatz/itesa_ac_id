@@ -16,6 +16,8 @@ class AdminMiddleware
     public function handle(Request $request, Closure $next)
     {
         if (Auth::check() && Auth::user()->role === 'admin') {
+            // Simpan status admin ke session
+            session(['is_admin' => true]);
             return $next($request);
         }
 

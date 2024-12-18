@@ -2,7 +2,29 @@
     "name": "laravel/laravel",
     "type": "project",
     "description": "The Laravel Framework.",
-    "keywords": ["framework", "laravel"],
+    "keywords": [
+        "framework",
+        "laravel"
+    ],
+    "author": {
+        "author1": {
+            "name": "Ridho Toti febianto",
+            "email": "ridhototi@gmail.com",
+            "url": "https://github.com/SkyyDcode",
+            "role": "Frontend fakultas"
+        },
+        "author2": {
+            "name": "Natanael Ben Iriyanto (Natzsixn)",
+            "email": "natzsixnismynames@gmail.com",
+            "url": "https://github.com/maousamanatz",
+            "role": "Frontend Dashboard Itesa.ac.id, Frontends Berita itesa.ac.id, Backend project itesa.ac.id"
+        },
+        "author3": {
+            "name": "Haidar rifky andriano",
+            "email": "haidar.rifky.andriano@gmail.com",
+            "url": "https://github.com/Hackivers"
+        }
+    },
     "license": "MIT",
     "require": {
         "php": "^8.1",

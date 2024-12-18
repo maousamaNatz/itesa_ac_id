@@ -3,18 +3,22 @@
 
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="description" content="{{ Str::limit(strip_tags($article->content), 160) }}" />
     <meta property="og:title" content="{{ $article->title }}" />
     <meta property="og:description" content="{{ Str::limit(strip_tags($article->content), 160) }}" />
     <meta property="og:image" content="{{ asset('storage/' . $article->thumbnail) }}" />
     <meta property="og:url" content="{{ request()->url() }}" />
-
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="article-id" content="{{ $article->id }}">
+    <meta name="user-id" content="{{ auth()->id() }}">
+    <meta name="user-photo" content="{{ auth()->check() ? asset('storage/profile_photos/' . auth()->user()->profile_photo) : asset('lib/default_media/default.jpg') }}">
     <title>{{ $article->title }} - Portal Berita ITESA</title>
     <link rel="icon" type="image/x-icon" href="{{ asset('lib/default_media/logos.png') }}">
     <link rel="stylesheet" href="{{ asset('lib/css/show.css') }}" />
     <link rel="stylesheet" href="{{ asset('lib/css/berita.css') }}" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 
 <body>
@@ -91,8 +95,7 @@
                                 </li>
                                 @foreach ($article->tags as $tags)
                                     <li class="tag-item">
-                                        <a
-                                            href="{{ route('berita.category', $tags->slug) }}">#{{ $tags->name }}</a>
+                                        <a href="{{ route('berita.category', $tags->slug) }}">#{{ $tags->name }}</a>
                                     </li>
                                 @endforeach
                             </ul>
@@ -122,8 +125,8 @@
                             <h3>
                                 <span>
 
+                                    Artikel Populer Minggu Ini
                                 </span>
-                                Artikel Populer Minggu Ini
                             </h3>
                             <div class="weekly-articles">
                                 @foreach ($weeklyTopArticles as $weeklyArticle)
@@ -143,6 +146,42 @@
                                         </a>
                                     </article>
                                 @endforeach
+                            </div>
+                        </div>
+                        {{-- Bagian Komentar --}}
+                        <div class="comments-section" id="comments-section">
+                            <h3 class="comments-title">Komentar (<span id="comment-count">{{ $comments->count() }}</span>)</h3>
+
+                            @auth
+                            <div class="comment-form-container">
+                                <form id="comment-form" class="comment-form" action="{{ route('comments.store') }}" method="POST">
+                                    @csrf
+                                    <input type="hidden" name="article_id" value="{{ $article->id }}">
+                                    <div class="user-comment-info">
+                                        <img src="{{ asset('storage/profile_photos/' . Auth::user()->profile_photo) ?? asset('./lib/default_media/default.jpg') }}"
+                                             class="comment-avatar" alt="{{ auth()->user()->name }}">
+                                        <span class="username">{{ auth()->user()->name }}</span>
+                                    </div>
+                                    <div class="form-group">
+                                        <textarea name="content" class="comment-textarea"
+                                                  placeholder="Tulis komentar Anda..." required></textarea>
+                                        <div class="form-actions">
+                                            <button type="submit" class="btn-submit">
+                                                <i class="fas fa-paper-plane"></i> Kirim
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            @else
+                            <div class="login-prompt">
+                                <p>Silakan <a href="{{ route('login') }}">login</a> untuk memberikan komentar</p>
+                            </div>
+                            @endauth
+
+                            <!-- Container untuk komentar realtime -->
+                            <div class="comments-list" id="comments-container">
+
                             </div>
                         </div>
 
@@ -212,7 +251,7 @@
                                 <div class="categories-list">
                                     @foreach ($allCategories as $category)
                                         <a href="{{ route('berita.category', $category->slug) }}"
-                                           class="category-item {{ request()->segment(3) == $category->slug ? 'active' : '' }}">
+                                            class="category-item {{ request()->segment(3) == $category->slug ? 'active' : '' }}">
                                             <span class="category-name">{{ $category->name }}</span>
                                             <span class="category-count">({{ $category->articles_count }})</span>
                                         </a>
@@ -255,6 +294,8 @@
     </main>
 
     @include('components.footerberita')
+    <script src="{{ asset('lib/js/berita.js') }}"></script>
+    <script src="{{ asset('lib/js/comment.js') }}"></script>
 
     <script>
         let lastScrollTop = 0;
@@ -290,6 +331,7 @@
             }
         });
     </script>
+
 </body>
 
 </html>

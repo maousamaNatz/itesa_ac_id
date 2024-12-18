@@ -2,7 +2,7 @@ import Alpine from "alpinejs";
 import persist from "@alpinejs/persist";
 
 import tinymce from "tinymce";
-
+import Swal from "sweetalert2";
 // Import tema dan plugin yang diperlukan
 import "tinymce/themes/silver";
 import "tinymce/icons/default";
@@ -320,15 +320,13 @@ document.addEventListener("DOMContentLoaded", function () {
 // Script untuk kategori
 document.addEventListener("DOMContentLoaded", function () {
     const navigationElements = {
-        sidebar: document.querySelector("#sidebar"),
+        sidebar: document.querySelector(".sidebar"),
         overlay: document.querySelector("#overlay"),
         toggleSidebarBtn: document.querySelector("#toggleSidebar"),
         closeSidebarBtn: document.querySelector("#closeSidebar"),
     };
 
     function initNavigation() {
-        // console.log('initNavigation called');
-        // console.log(navigationElements);
 
         // Pastikan semua elemen ada sebelum menambahkan event listener
         if (navigationElements.toggleSidebarBtn && navigationElements.sidebar) {
@@ -557,23 +555,6 @@ document.addEventListener("DOMContentLoaded", function () {
         clearPreview();
     });
 });
-// Fungsi untuk membatasi teks dengan elipsis
-function truncateText(elements, maxLength) {
-    elements.forEach((element) => {
-        const text = element.textContent;
-        if (text.length > maxLength) {
-            element.textContent = text.substring(0, maxLength) + "...";
-        }
-    });
-}
-
-// Pilih semua elemen yang ingin dibatasi teksnya
-const textElements = document.querySelectorAll(".elipsis");
-const tagElements = document.querySelectorAll(".jdl-items");
-
-// Batasi teks menjadi 100 karakter
-truncateText(textElements, 120);
-truncateText(tagElements, 200);
 
 // Komponen notifikasi global
 window.notifications = function() {
@@ -627,4 +608,230 @@ document.addEventListener('DOMContentLoaded', function() {
             serverNotification.message
         );
     }
+});
+
+// Template SweetAlert untuk konfirmasi hapus
+window.confirmDelete = function(options = {}) {
+    const defaultOptions = {
+        title: 'Apakah Anda yakin?',
+        text: 'Data yang dihapus tidak dapat dikembalikan!',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#a10d05',
+        cancelButtonColor: '#6B7280',
+        confirmButtonText: 'Ya, hapus!',
+        cancelButtonText: 'Batal'
+    };
+
+    // Gabungkan opsi default dengan opsi yang diberikan
+    const finalOptions = { ...defaultOptions, ...options };
+
+    return Swal.fire(finalOptions);
+}
+
+// Template SweetAlert untuk notifikasi sukses
+window.showSuccess = function(message, title = 'Berhasil!') {
+    return Swal.fire({
+        title: title,
+        text: message,
+        icon: 'success',
+        confirmButtonColor: '#a10d05',
+        timer: 3000,
+        timerProgressBar: true
+    });
+}
+
+// Template SweetAlert untuk notifikasi error
+window.showError = function(message, title = 'Error!') {
+    return Swal.fire({
+        title: title,
+        text: message,
+        icon: 'error',
+        confirmButtonColor: '#a10d05'
+    });
+}
+
+// Template SweetAlert untuk notifikasi warning
+window.showWarning = function(message, title = 'Perhatian!') {
+    return Swal.fire({
+        title: title,
+        text: message,
+        icon: 'warning',
+        confirmButtonColor: '#a10d05'
+    });
+}
+
+// Template SweetAlert untuk notifikasi info
+window.showInfo = function(message, title = 'Informasi') {
+    return Swal.fire({
+        title: title,
+        text: message,
+        icon: 'info',
+        confirmButtonColor: '#a10d05'
+    });
+}
+
+// Template SweetAlert untuk konfirmasi custom
+window.confirmAction = function(options = {}) {
+    const defaultOptions = {
+        title: 'Apakah Anda yakin?',
+        text: 'Tindakan ini tidak dapat dibatalkan!',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#a10d05',
+        cancelButtonColor: '#6B7280',
+        confirmButtonText: 'Ya, lanjutkan!',
+        cancelButtonText: 'Batal'
+    };
+
+    return Swal.fire({ ...defaultOptions, ...options });
+}
+
+// Contoh penggunaan pada event handler delete
+document.addEventListener('DOMContentLoaded', function() {
+    const deleteButtons = document.querySelectorAll('.delete-btn');
+
+    deleteButtons.forEach(button => {
+        button.addEventListener('click', async function(e) {
+            e.preventDefault();
+            const form = this.closest('.delete-form');
+            const itemType = this.dataset.type || 'item'; // artikel/komentar/dll
+
+            try {
+                const result = await confirmDelete({
+                    text: `Anda akan menghapus ${itemType} ini. Tindakan ini tidak dapat dibatalkan!`
+                });
+
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            } catch (error) {
+                showError('Terjadi kesalahan saat memproses permintaan.');
+            }
+        });
+    });
+
+    // Handle notifikasi dari server (jika ada)
+    const serverNotification = document.querySelector('#server-notification');
+    if (serverNotification) {
+        const { type, message, title } = serverNotification.dataset;
+
+        switch(type) {
+            case 'success':
+                showSuccess(message, title);
+                break;
+            case 'error':
+                showError(message, title);
+                break;
+            case 'warning':
+                showWarning(message, title);
+                break;
+            case 'info':
+                showInfo(message, title);
+                break;
+        }
+
+        serverNotification.remove();
+    }
+});
+
+// Fungsi untuk membatasi teks
+function limitText(selector, options = { wordLimit: null, charLimit: null }) {
+    const elements = document.querySelectorAll(selector);
+
+    elements.forEach(el => {
+        // Pastikan mengambil teks asli dari data-original-text
+        const originalText = el.getAttribute('data-original-text') || el.textContent;
+
+        // Simpan teks asli jika belum ada
+        if (!el.getAttribute('data-original-text')) {
+            el.setAttribute('data-original-text', originalText);
+        }
+
+        let modifiedText = originalText;
+
+        // Batasi berdasarkan jumlah kata
+        if (options.wordLimit) {
+            const words = originalText.trim().split(/\s+/);
+            if (words.length > options.wordLimit) {
+                modifiedText = words.slice(0, options.wordLimit).join(' ') + '...';
+            }
+        }
+
+        // Batasi berdasarkan jumlah karakter
+        if (options.charLimit) {
+            if (originalText.length > options.charLimit) {
+                modifiedText = originalText.slice(0, options.charLimit).trim() + '...';
+            }
+        }
+
+        el.textContent = modifiedText;
+    });
+}
+
+// Konfigurasi responsif yang lebih spesifik
+const responsiveConfig = [
+    {
+        maxWidth: 480,
+        selector: '.limited-text',
+        options: {
+            wordLimit: 20,  // Lebih pendek untuk mobile
+            charLimit: 300
+        }
+    },
+    {
+        maxWidth: 768,
+        selector: '.limited-text',
+        options: {
+            wordLimit: 40,  // Medium untuk tablet
+            charLimit: 700
+        }
+    },
+    {
+        maxWidth: 1024,
+        selector: '.limited-text',
+        options: {
+            wordLimit: 60, // Lebih panjang untuk desktop
+            charLimit: 700
+        }
+    },
+    {
+        maxWidth: Infinity,
+        selector: '.limited-text',
+        options: {
+            wordLimit: 100, // Maksimum untuk layar besar
+            charLimit: 700
+        }
+    }
+];
+
+// Fungsi untuk menerapkan pembatasan responsif
+function applyResponsiveQueries(config) {
+    const width = window.innerWidth;
+
+    // Cari konfigurasi yang sesuai dengan lebar layar
+    const activeConfig = config.find(query => width <= query.maxWidth);
+
+    if (activeConfig) {
+        limitText(activeConfig.selector, activeConfig.options);
+    }
+}
+
+// Event listener dengan debouncing untuk resize
+let resizeTimeout;
+window.addEventListener('resize', () => {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(() => {
+        applyResponsiveQueries(responsiveConfig);
+    }, 50);
+});
+
+// Terapkan saat halaman dimuat
+document.addEventListener('DOMContentLoaded', () => {
+    applyResponsiveQueries(responsiveConfig);
+});
+
+// Terapkan setelah AJAX load jika ada
+document.addEventListener('ajax-content-loaded', () => {
+    applyResponsiveQueries(responsiveConfig);
 });

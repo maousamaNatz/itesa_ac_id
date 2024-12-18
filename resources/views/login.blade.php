@@ -93,6 +93,10 @@
       </div>
     </div>
 
+    <p class="text-center mt-4 text-sm text-gray-600">
+        Tidak mempunyai akun?
+        <a href="{{route('register')}}" class="font-medium text-[#a10d05] hover:text-[#8f0b04]">Buat sekarang juga</a>
+    </p>
     @if(session()->has('notification'))
     <script>
       Swal.fire({

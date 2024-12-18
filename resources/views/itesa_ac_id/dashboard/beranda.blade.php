@@ -48,7 +48,7 @@
         </div>
     </div>
 
-    <div class="p-8">
+    <div class="py-2">
         <!-- Quick Actions -->
         <div class="mb-8">
             <h2 class="text-xl font-semibold mb-4">Aksi Cepat</h2>
@@ -109,19 +109,31 @@
                                     <div class="flex items-center">
                                         <img class="h-10 w-10 rounded-lg object-cover"
                                             src="{{ $article->thumbnail ? asset('storage/' . $article->thumbnail) : asset('lib/default_media/no-image.png') }}"
-                                            alt="{{ $article->title }}" width="800" height="600" loading="lazy"
+                                            alt="{!! Str::limit(strip_tags($article->content), 120, '...') !!}" width="800" height="600" loading="lazy"
                                             decoding="async">
                                         <div class="ml-4">
-                                            <div class="text-sm font-medium text-gray-900 elipsis jdl-items">
+                                            <div class="text-sm font-medium text-gray-900">
                                                 <a href="{{ route('berita.show', $article->slug) }}"
                                                     class="hover:text-[#a10d05]">
                                                     {{ $article->title }}
                                                 </a>
                                             </div>
-                                            <div class="w-max-[200px] flex-nowrap flex gap-2 overflow-hidden whitespace-nowrap text-nowrap elipsis">
-                                                @foreach ($article->tags as $tag)
-                                                    <div class="text-sm text-gray-500">#{{ $tag->name }}</div>
-                                                @endforeach
+                                            <div class="w-max-[200px] flex flex-wrap gap-2 relative group">
+                                                <div class="limited-text">
+                                                    @foreach ($article->tags as $tag)
+                                                        <div class="text-sm text-gray-500 truncate hover:overflow-visible"
+                                                            data-original-text="#{{ $tag->name }}"
+                                                            title="#{{ $tag->name }}">
+                                                            #{{ $tag->name }}
+                                                        </div>
+                                                    @endforeach
+                                                </div>
+
+                                                @if (count($article->tags) > 3)
+                                                    <div class="text-sm text-gray-400">
+                                                        +{{ count($article->tags) - 3 }} more
+                                                    </div>
+                                                @endif
                                             </div>
                                         </div>
                                     </div>
@@ -151,11 +163,10 @@
                                         <i class="fas fa-edit"></i>
                                     </a>
                                     <form action="{{ route('admin.article.destroy', $article->id) }}" method="POST"
-                                        class="inline">
+                                        class="inline delete-form">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="text-red-600 hover:text-red-900"
-                                            onclick="return confirm('Apakah Anda yakin ingin menghapus artikel ini?')">
+                                        <button type="button" class="text-red-600 hover:text-red-900 delete-btn">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </form>
@@ -188,7 +199,7 @@
                 <div class="space-y-6">
                     @forelse($latestComments as $comment)
                         <div class="flex items-start space-x-4">
-                            <img src="{{ $comment->user->profile_photo ? asset('storage/' . $comment->user->profile_photo) : asset('lib/default_media/default-avatar.png') }}"
+                            <img src="{{ $comment->user->profile_photo ? asset('storage/profile_photos/' . $comment->user->profile_photo): asset('./lib/default_media/default.jpg') }}"
                                 alt="{{ $comment->user->username }}" class="w-10 h-10 rounded-full object-cover">
                             <div class="flex-1">
                                 <div class="flex items-center justify-between">
@@ -212,20 +223,19 @@
                                             <i class="fas fa-eye"></i>
                                         </a>
                                     @endif
-                                    <form action="{{ route('admin.comment.approve', $comment->id) }}" method="POST"
+                                    {{-- <form action="{{ route('admin.comment.approve', $comment->id) }}" method="POST"
                                         class="inline">
                                         @csrf
                                         @method('PATCH')
                                         <button type="submit" class="text-sm text-gray-500 hover:text-gray-600">
                                             <i class="fas fa-check mr-1"></i> Setujui
                                         </button>
-                                    </form>
+                                    </form> --}}
                                     <form action="{{ route('admin.comment.destroy', $comment->id) }}" method="POST"
-                                        class="inline">
+                                        class="inline delete-form">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="text-sm text-red-500 hover:text-red-600"
-                                            onclick="return confirm('Apakah Anda yakin ingin menghapus komentar ini?')">
+                                        <button type="button" class="text-sm text-red-500 hover:text-red-600 delete-btn">
                                             <i class="fas fa-trash mr-1"></i> Hapus
                                         </button>
                                     </form>
@@ -242,3 +252,28 @@
         </div>
     </div>
 @endsection
+
+@push('scripts')
+    <script>
+        // Pass notification data dari server ke JavaScript
+        @if (session('notification'))
+            const serverNotification = @json(session('notification'));
+        @endif
+
+        // Pass additional info untuk membedakan tipe delete (artikel/komentar)
+        const deleteConfig = {
+            article: {
+                text: 'Artikel yang dihapus tidak dapat dikembalikan! Semua data terkait artikel ini juga akan dihapus.',
+                confirmButtonText: 'Ya, hapus artikel!'
+            },
+            comment: {
+                text: 'Komentar yang dihapus tidak dapat dikembalikan!',
+                confirmButtonText: 'Ya, hapus komentar!'
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeDeleteHandlers(deleteConfig);
+        });
+    </script>
+@endpush

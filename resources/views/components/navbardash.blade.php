@@ -30,11 +30,11 @@
             <div class="relative" id="profileDropdown">
                 <button class="flex items-center space-x-2">
                     @if(Auth::user()->profile_photo)
-                        <img src="{{ asset('storage/' . Auth::user()->profile_photo) }}"
+                        <img src="{{ asset('storage/profile_photos/' . Auth::user()->profile_photo) }}"
                              alt="Profile"
                              class="w-10 h-10 rounded-full object-cover">
                     @else
-                        <img src="{{ asset('lib/default_media/default-avatar.png') }}"
+                        <img src="{{ asset('lib/default_media/default.jpg') }}"
                              alt="Profile Default"
                              class="w-10 h-10 rounded-full">
                     @endif
@@ -44,13 +44,13 @@
                     <div class="px-4 py-2 border-b">
                         <p class="text-sm text-gray-500">{{ Auth::user()->email }}</p>
                     </div>
-                    {{-- <a href="{{ route('admin.profile') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">
+                    <a href="{{ route('profile.show') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">
                         <i class="fas fa-user mr-2"></i>Profil
                     </a>
-                    <a href="{{ route('admin.settings') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">
+                    {{-- <a href="{{ route('admin.settings') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">
                         <i class="fas fa-cog mr-2"></i>Pengaturan
                     </a> --}}
-                    <form action="{{ route('logout') }}" method="POST">
+                    <aform action="{{ route('logout') }}" method="POST">
                         @csrf
                         <button type="submit" class="w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100">
                             <i class="fas fa-sign-out-alt mr-2"></i>Keluar

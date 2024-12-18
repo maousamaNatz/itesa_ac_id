@@ -41,31 +41,31 @@ ITESA News Portal adalah platform berita dan informasi resmi Institut ITESA Muha
 
 ## Instalasi
 
-<img src="./public/apacoba.png" style="width: 300px; height: 300px; object-fit: cover;">
+<img src="./public/apacoba.png" style="width: 100%; object-fit: cover;">
 
 
 1. Clone repository
-``
+``bash
 git clone https://github.com/maousamaNatz/itesa_ac_id.git
 cd itesa-news-portal
 ``
 2. Install dependencies
 
-``
+``bash
 composer install
 npm install
 ``
 
 3. Setup environment
 
-``
+``bash
 cp .env.example .env
 php artisan key:generate
 ``
 
 4. Konfigurasi database di file .env
 
-``
+``bash
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
@@ -76,19 +76,19 @@ DB_PASSWORD=
 
 5. Migrasi dan seed database
 
-``
+``bash
 php artisan migrate --seed
 ``
 
 6. Compile assets
 
-``
+``bash
 npm run dev
 ``
 
 7. Jalankan server
 
-``
+``bash
 php artisan serve
 ``
 
@@ -177,7 +177,7 @@ php artisan serve
 Project ini dikembangkan sebagai bagian dari sistem informasi ITESA Muhammadiyah. Untuk informasi lebih lanjut atau melaporkan bug, silakan buat issue di repository ini atau hubungi tim pengembang.
 
 ### Lisensi
-Project ini dilindungi hak cipta dan merupakan properti dari Institut Teknologi ITESA Muhammadiyah. [@LICENCE](../itesa.ac.id/LICENCE)
+Project ini dilindungi hak cipta dan merupakan properti dari Institut Teknologi ITESA Muhammadiyah.
 
 ### Kontribusi
 Untuk berkontribusi pada project ini, silakan buat pull request atau hubungi tim pengembang.
