@@ -13,15 +13,29 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\File;
 
+/**
+ * Controller untuk mengelola data user/pengguna
+ *
+ * @package App\Http\Controllers
+ */
 class UserController extends Controller
 {
+    /**
+     * Constructor untuk UserController
+     * Menerapkan middleware auth untuk semua method
+     *
+     * @return void
+     */
     public function __construct()
     {
         $this->middleware('auth');
     }
 
     /**
-     * Menampilkan profil user yang sedang login
+     * Menampilkan halaman profil user
+     *
+     * @return \Illuminate\View\View|\Illuminate\Http\RedirectResponse
+     * @throws \Exception Ketika terjadi kesalahan dalam memuat data
      */
     public function profile()
     {
@@ -61,7 +75,10 @@ class UserController extends Controller
     }
 
     /**
-     * Menampilkan form edit profil
+     * Menampilkan form edit profil user
+     *
+     * @return \Illuminate\View\View|\Illuminate\Http\RedirectResponse
+     * @throws \Exception Ketika terjadi kesalahan dalam memuat form
      */
     public function edit()
     {
@@ -75,7 +92,18 @@ class UserController extends Controller
     }
 
     /**
-     * Update data profil user
+     * Memperbarui data profil user
+     *
+     * @param \Illuminate\Http\Request $request Request dengan data yang akan diupdate
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \Exception Ketika terjadi kesalahan dalam memperbarui data
+     *
+     * @bodyParam username string required Username baru user. Max:255
+     * @bodyParam email string required Email baru user. Max:255
+     * @bodyParam bio string optional Bio user. Max:500
+     * @bodyParam current_password string required_with:new_password Password saat ini
+     * @bodyParam new_password string optional Password baru. Min:8
+     * @bodyParam new_password_confirmation string optional Konfirmasi password baru
      */
     public function update(Request $request)
     {
@@ -135,7 +163,13 @@ class UserController extends Controller
     }
 
     /**
-     * Menghapus akun user
+     * Menghapus akun user beserta data terkait
+     *
+     * @param \Illuminate\Http\Request $request Request dengan password konfirmasi
+     * @return \Illuminate\Http\RedirectResponse
+     * @throws \Exception Ketika terjadi kesalahan dalam menghapus akun
+     *
+     * @bodyParam password string required Password untuk konfirmasi penghapusan akun
      */
     public function destroy(Request $request)
     {
@@ -165,6 +199,38 @@ class UserController extends Controller
         }
     }
 
+    /**
+     * Mengupload dan memperbarui foto profil user
+     *
+     * @param \Illuminate\Http\Request $request Request dengan file foto
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \Exception Ketika terjadi kesalahan dalam upload foto
+     *
+     * @bodyParam profile_photo file required File foto profil. Allowed:jpeg,png,jpg. Max:2048KB
+     *
+     * @response {
+     *   "success": true,
+     *   "message": "Foto profil berhasil diperbarui",
+     *   "photo_url": "http://example.com/storage/profile_photos/123456_abcdef.jpg"
+     * }
+     *
+     * @response 400 {
+     *   "success": false,
+     *   "message": "Tidak ada file yang diupload"
+     * }
+     *
+     * @response 422 {
+     *   "message": "The profile photo field is required.",
+     *   "errors": {
+     *     "profile_photo": ["The profile photo field is required."]
+     *   }
+     * }
+     *
+     * @response 500 {
+     *   "success": false,
+     *   "message": "Gagal mengupload foto profil: [error message]"
+     * }
+     */
     public function uploadPhoto(Request $request)
     {
         try {

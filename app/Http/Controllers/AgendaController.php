@@ -1,15 +1,38 @@
 <?php
 
+/**
+ * Controller Agenda
+ *
+ * @package App\Http\Controllers
+ * @description Controller untuk mengelola agenda/kegiatan di ITESA
+ */
+
 namespace App\Http\Controllers;
 
 use App\Models\Agenda;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
+/**
+ * Class AgendaController
+ * Mengelola CRUD operasi untuk agenda/kegiatan
+ *
+ * @package App\Http\Controllers
+ */
 class AgendaController extends Controller
 {
     /**
      * Menampilkan daftar agenda
+     *
+     * @return \Illuminate\View\View|\Illuminate\Http\RedirectResponse
+     * @throws \Exception Ketika terjadi kesalahan dalam memuat data
+     *
+     * @response {
+     *   "view": "itesa_ac_id.dashboard.agenda",
+     *   "data": {
+     *     "agendas": "LengthAwarePaginator"
+     *   }
+     * }
      */
     public function index()
     {
@@ -23,7 +46,9 @@ class AgendaController extends Controller
     }
 
     /**
-     * Menampilkan form tambah agenda
+     * Menampilkan form tambah agenda baru
+     *
+     * @return \Illuminate\View\View
      */
     public function create()
     {
@@ -31,7 +56,25 @@ class AgendaController extends Controller
     }
 
     /**
-     * Menyimpan agenda baru
+     * Menyimpan agenda baru ke database
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\RedirectResponse
+     * @throws \Exception
+     *
+     * @bodyParam title string required Judul agenda. Max:255
+     * @bodyParam description string required Deskripsi agenda
+     * @bodyParam start_date date required Tanggal mulai agenda
+     * @bodyParam end_date date required Tanggal selesai agenda. After or equal:start_date
+     * @bodyParam location string required Lokasi agenda. Max:255
+     * @bodyParam status string required Status agenda (active/inactive)
+     *
+     * @response 302 {
+     *   "redirect": "admin.agenda.index",
+     *   "with": {
+     *     "success": "Agenda berhasil ditambahkan"
+     *   }
+     * }
      */
     public function store(Request $request)
     {
@@ -60,6 +103,10 @@ class AgendaController extends Controller
 
     /**
      * Menampilkan form edit agenda
+     *
+     * @param int $id ID agenda
+     * @return \Illuminate\View\View|\Illuminate\Http\RedirectResponse
+     * @throws \Exception
      */
     public function edit($id)
     {
@@ -73,7 +120,26 @@ class AgendaController extends Controller
     }
 
     /**
-     * Mengupdate agenda
+     * Memperbarui data agenda
+     *
+     * @param \Illuminate\Http\Request $request
+     * @param int $id ID agenda
+     * @return \Illuminate\Http\RedirectResponse
+     * @throws \Exception
+     *
+     * @bodyParam title string required Judul agenda. Max:255
+     * @bodyParam description string required Deskripsi agenda
+     * @bodyParam start_date date required Tanggal mulai agenda
+     * @bodyParam end_date date required Tanggal selesai agenda. After or equal:start_date
+     * @bodyParam location string required Lokasi agenda. Max:255
+     * @bodyParam status string required Status agenda (active/inactive)
+     *
+     * @response 302 {
+     *   "redirect": "admin.agenda.index",
+     *   "with": {
+     *     "success": "Agenda berhasil diperbarui"
+     *   }
+     * }
      */
     public function update(Request $request, $id)
     {
@@ -104,6 +170,17 @@ class AgendaController extends Controller
 
     /**
      * Menghapus agenda
+     *
+     * @param int $id ID agenda
+     * @return \Illuminate\Http\RedirectResponse
+     * @throws \Exception
+     *
+     * @response 302 {
+     *   "redirect": "admin.agenda.index",
+     *   "with": {
+     *     "success": "Agenda berhasil dihapus"
+     *   }
+     * }
      */
     public function destroy($id)
     {
@@ -122,6 +199,17 @@ class AgendaController extends Controller
 
     /**
      * Menampilkan detail agenda
+     *
+     * @param int $id ID agenda
+     * @return \Illuminate\View\View|\Illuminate\Http\RedirectResponse
+     * @throws \Exception
+     *
+     * @response {
+     *   "view": "itesa_ac_id.dashboard.agenda.show",
+     *   "data": {
+     *     "agenda": "App\Models\Agenda"
+     *   }
+     * }
      */
     public function show($id)
     {

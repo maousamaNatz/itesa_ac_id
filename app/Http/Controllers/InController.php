@@ -1,5 +1,12 @@
 <?php
 
+/**
+ * Controller In
+ *
+ * @package App\Http\Controllers
+ * @description Controller untuk mengelola halaman utama dan kategori artikel di ITESA
+ */
+
 namespace App\Http\Controllers;
 
 use App\Models\Article;
@@ -9,10 +16,31 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
+/**
+ * Class InController
+ * Mengelola tampilan halaman utama dan kategori artikel
+ *
+ * @package App\Http\Controllers
+ */
 class InController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Menampilkan halaman utama website
+     * Memuat artikel terbaru, agenda mendatang, artikel populer, dan kategori
+     *
+     * @return \Illuminate\View\View
+     * @throws \Exception Ketika terjadi kesalahan dalam memuat data
+     *
+     * @response {
+     *   "view": "itesa_ac_id.index",
+     *   "data": {
+     *     "latestArticles": "Collection",
+     *     "upcomingAgendas": "Collection",
+     *     "popularArticles": "Collection",
+     *     "categories": "Collection",
+     *     "articlesByCategory": "Collection"
+     *   }
+     * }
      */
     public function index()
     {
@@ -37,7 +65,6 @@ class InController extends Controller
                     ->take(8)
                     ->get();
 
-                // Log untuk debugging
                 \Log::info('Latest Articles Query:', [
                     'query' => \DB::getQueryLog(),
                     'count' => $latestArticles->count(),
@@ -107,6 +134,12 @@ class InController extends Controller
         }
     }
 
+    /**
+     * Menampilkan halaman kategori Management Retail
+     *
+     * @return \Illuminate\View\View
+     * @throws ModelNotFoundException Ketika kategori tidak ditemukan
+     */
     public function management_retail()
     {
         try {
@@ -147,6 +180,12 @@ class InController extends Controller
         }
     }
 
+    /**
+     * Menampilkan halaman kategori Teknologi Informasi
+     *
+     * @return \Illuminate\View\View
+     * @throws ModelNotFoundException Ketika kategori tidak ditemukan
+     */
     public function teknologi_informasi()
     {
         try {
@@ -166,6 +205,12 @@ class InController extends Controller
         }
     }
 
+    /**
+     * Menampilkan halaman kategori Sains Aktuaria
+     *
+     * @return \Illuminate\View\View
+     * @throws ModelNotFoundException Ketika kategori tidak ditemukan
+     */
     public function sains_aktuaria()
     {
         try {
@@ -177,7 +222,6 @@ class InController extends Controller
                 ->latest('published_at')
                 ->paginate(6);
 
-            // Ambil data tambahan untuk sidebar
             $popularArticles = Article::with(['author', 'category'])
                 ->where('status', 'published')
                 ->where('category_id', $category->id)

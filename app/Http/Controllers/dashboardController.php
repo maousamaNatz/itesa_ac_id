@@ -1,12 +1,11 @@
 <?php
-/*
-|--------------------------------------------------------------------------
-| Controller Dashboard
-|--------------------------------------------------------------------------
-| berikut adalah controller dashboard yang digunakan untuk mengelola dashboard secara
-| keseluruhan dari portal berita ITESA tidak untuk web itesa secara keseluruhan dan
-| tidak untuk web lainnya
-*/
+
+/**
+ * Controller Dashboard
+ *
+ * @package App\Http\Controllers
+ * @description Controller untuk mengelola dashboard portal berita ITESA
+ */
 
 namespace App\Http\Controllers;
 
@@ -28,10 +27,22 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
+/**
+ * Class DashboardController
+ * Mengelola fungsionalitas dashboard admin portal berita ITESA
+ *
+ * @package App\Http\Controllers
+ */
 class DashboardController extends Controller
 {
     use MediaHandlerTrait, NotificationHandlerTrait;
 
+    /**
+     * Menampilkan halaman dashboard utama
+     *
+     * @return \Illuminate\View\View
+     * @throws \Exception Ketika terjadi kesalahan dalam mengambil data
+     */
     public function index()
     {
         $user = auth()->user();
@@ -68,6 +79,11 @@ class DashboardController extends Controller
         );
     }
 
+    /**
+     * Menampilkan daftar artikel
+     *
+     * @return \Illuminate\View\View
+     */
     public function article()
     {
         $articles = Article::with(['category', 'author'])
@@ -80,6 +96,12 @@ class DashboardController extends Controller
             compact('articles', 'categories')
         );
     }
+
+    /**
+     * Menampilkan form pembuatan artikel baru
+     *
+     * @return \Illuminate\View\View
+     */
     public function createarticle()
     {
         $categories = categori::orderBy('name')->get();
@@ -88,6 +110,24 @@ class DashboardController extends Controller
             compact('categories')
         );
     }
+
+    /**
+     * Menyimpan artikel baru ke database
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\RedirectResponse
+     * @throws \Exception
+     *
+     * @bodyParam title string required Judul artikel. Max:255
+     * @bodyParam content string required Konten artikel
+     * @bodyParam thumbnail file required Gambar thumbnail. Allowed:jpeg,png,jpg. Max:2048KB
+     * @bodyParam meta_title string optional Meta title untuk SEO
+     * @bodyParam meta_description string optional Meta description untuk SEO
+     * @bodyParam meta_keyword string optional Meta keywords untuk SEO
+     * @bodyParam category_ids array required Array ID kategori
+     * @bodyParam status string required Status artikel (draft/published)
+     * @bodyParam tags string required Tag artikel (dipisahkan dengan koma)
+     */
     public function storeArticle(Request $request)
     {
         try {
@@ -246,6 +286,11 @@ class DashboardController extends Controller
         }
     }
 
+    /**
+     * Menampilkan daftar kategori
+     *
+     * @return \Illuminate\View\View
+     */
     public function category()
     {
         $categories = categori::withCount('articles')
@@ -255,6 +300,11 @@ class DashboardController extends Controller
         return view('itesa_ac_id.dashboard.category', compact('categories'));
     }
 
+    /**
+     * Menampilkan form pembuatan kategori baru
+     *
+     * @return \Illuminate\View\View
+     */
     public function createcategory()
     {
         $categories = Category::all();
@@ -263,13 +313,23 @@ class DashboardController extends Controller
             compact('categories')
         );
     }
+
+    /**
+     * Menampilkan form edit kategori
+     *
+     * @param \App\Models\categori $category
+     * @return \Illuminate\View\View
+     */
     public function editcategory(categori $category)
     {
         $categories = Category::all();
         return view('itesa_ac_id.dashboard.editcategory', compact('category'));
     }
+
     /**
-     * Show all comments
+     * Menampilkan daftar komentar
+     *
+     * @return \Illuminate\View\View
      */
     public function comment()
     {
@@ -279,8 +339,19 @@ class DashboardController extends Controller
 
         return view('itesa_ac_id.dashboard.comment', compact('comments'));
     }
+
     /**
-     * Upload image for content
+     * Upload gambar untuk konten artikel
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \Exception
+     *
+     * @bodyParam file file required File gambar. Allowed:jpeg,png,jpg
+     *
+     * @response {
+     *   "location": "http://example.com/storage/content_images/filename.jpg"
+     * }
      */
     public function uploadImage(Request $request)
     {
@@ -312,7 +383,11 @@ class DashboardController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Menampilkan detail artikel
+     *
+     * @param string $slug
+     * @return \Illuminate\View\View|\Illuminate\Http\RedirectResponse
+     * @throws \Exception
      */
     public function show($slug)
     {
@@ -341,11 +416,24 @@ class DashboardController extends Controller
                 ->with('error', 'Artikel tidak ditemukan.');
         }
     }
+
+    /**
+     * Menampilkan form pembuatan agenda
+     *
+     * @return \Illuminate\View\View
+     */
     public function createAgenda()
     {
         $agenda = Agenda::all();
         return view('itesa_ac_id.dashboard.createAgenda', compact('agenda'));
     }
+
+    /**
+     * Menampilkan daftar agenda
+     *
+     * @return \Illuminate\View\View
+     * @throws \Exception
+     */
     public function agenda()
     {
         try {
@@ -360,6 +448,21 @@ class DashboardController extends Controller
             ]);
         }
     }
+
+    /**
+     * Menyimpan agenda baru
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\RedirectResponse
+     * @throws \Exception
+     *
+     * @bodyParam title string required Judul agenda
+     * @bodyParam description string required Deskripsi agenda
+     * @bodyParam start_date date required Tanggal mulai
+     * @bodyParam end_date date required Tanggal selesai
+     * @bodyParam location string required Lokasi agenda
+     * @bodyParam status string required Status agenda (active/inactive)
+     */
     public function storeAgenda(Request $request)
     {
         try {
@@ -400,6 +503,14 @@ class DashboardController extends Controller
                 ]);
         }
     }
+
+    /**
+     * Menampilkan form edit agenda
+     *
+     * @param \App\Models\Agenda $agenda
+     * @return \Illuminate\View\View
+     * @throws \Exception
+     */
     public function editAgenda(Agenda $agenda)
     {
         try {
@@ -415,6 +526,22 @@ class DashboardController extends Controller
                 ]);
         }
     }
+
+    /**
+     * Memperbarui data agenda
+     *
+     * @param \Illuminate\Http\Request $request
+     * @param \App\Models\Agenda $agenda
+     * @return \Illuminate\Http\RedirectResponse
+     * @throws \Exception
+     *
+     * @bodyParam title string required Judul agenda
+     * @bodyParam description string required Deskripsi agenda
+     * @bodyParam start_date date required Tanggal mulai
+     * @bodyParam end_date date required Tanggal selesai
+     * @bodyParam location string required Lokasi agenda
+     * @bodyParam status string required Status agenda (active/inactive)
+     */
     public function updateAgenda(Request $request, Agenda $agenda)
     {
         try {
@@ -453,6 +580,14 @@ class DashboardController extends Controller
                 ]);
         }
     }
+
+    /**
+     * Menghapus agenda
+     *
+     * @param \App\Models\Agenda $agenda
+     * @return \Illuminate\Http\RedirectResponse
+     * @throws \Exception
+     */
     public function destroyAgenda(Agenda $agenda)
     {
         try {
@@ -474,6 +609,14 @@ class DashboardController extends Controller
             ]);
         }
     }
+
+    /**
+     * Menghapus artikel
+     *
+     * @param int $article ID artikel
+     * @return \Illuminate\Http\RedirectResponse
+     * @throws \Exception
+     */
     public function destroyarticle($article)
     {
         try {
@@ -510,6 +653,13 @@ class DashboardController extends Controller
         }
     }
 
+    /**
+     * Menghapus kategori
+     *
+     * @param \App\Models\categori $category
+     * @return \Illuminate\Http\RedirectResponse
+     * @throws \Exception
+     */
     public function deletecategory(categori $category)
     {
         try {
@@ -534,6 +684,17 @@ class DashboardController extends Controller
         }
     }
 
+    /**
+     * Menyimpan kategori baru
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\RedirectResponse
+     * @throws \Exception
+     *
+     * @bodyParam name string required Nama kategori
+     * @bodyParam description string optional Deskripsi kategori
+     * @bodyParam image file optional Gambar kategori. Allowed:jpeg,png,jpg. Max:2048KB
+     */
     public function storecategory(Request $request)
     {
         try {
@@ -579,6 +740,13 @@ class DashboardController extends Controller
         }
     }
 
+    /**
+     * Menampilkan form edit artikel
+     *
+     * @param int $id ID artikel
+     * @return \Illuminate\View\View|\Illuminate\Http\RedirectResponse
+     * @throws \Exception
+     */
     public function editarticle($id)
     {
         try {
@@ -607,6 +775,22 @@ class DashboardController extends Controller
         }
     }
 
+    /**
+     * Memperbarui data artikel
+     *
+     * @param \Illuminate\Http\Request $request
+     * @param int $id ID artikel
+     * @return \Illuminate\Http\RedirectResponse
+     * @throws \Exception
+     *
+     * @bodyParam title string required Judul artikel
+     * @bodyParam content string required Konten artikel
+     * @bodyParam thumbnail file optional Gambar thumbnail baru
+     * @bodyParam meta_title string optional Meta title untuk SEO
+     * @bodyParam meta_description string optional Meta description untuk SEO
+     * @bodyParam category_ids array required Array ID kategori
+     * @bodyParam status string required Status artikel (draft/published)
+     */
     public function updatearticle(Request $request, $id)
     {
         try {
@@ -744,6 +928,13 @@ class DashboardController extends Controller
                 ]);
         }
     }
+
+    /**
+     * Menghapus komentar
+     *
+     * @param \App\Models\Comment $comment
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function destroycomment(Comment $comment)
     {
         $comment->delete();
@@ -757,7 +948,9 @@ class DashboardController extends Controller
     }
 
     /**
-     * Menampilkan profil pengguna.
+     * Menampilkan profil pengguna
+     *
+     * @return \Illuminate\View\View
      */
     public function showProfile()
     {
@@ -766,6 +959,11 @@ class DashboardController extends Controller
         return view('itesa_ac_id.dashboard.profile', compact('user', 'articles'));
     }
 
+    /**
+     * Menampilkan form edit profil
+     *
+     * @return \Illuminate\View\View
+     */
     public function editProfile()
     {
         $user = Auth::user();
@@ -774,6 +972,17 @@ class DashboardController extends Controller
         return view('itesa_ac_id.dashboard.editProfile', compact('user'));
     }
 
+    /**
+     * Memperbarui profil pengguna
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\JsonResponse
+     *
+     * @bodyParam name string required Nama pengguna
+     * @bodyParam email string required Email pengguna
+     * @bodyParam password string optional Password baru
+     * @bodyParam bio string optional Bio pengguna
+     */
     public function updateProfile(Request $request)
     {
         $user = Auth::user();
@@ -801,6 +1010,21 @@ class DashboardController extends Controller
         return response()->json(['success' => true]);
     }
 
+    /**
+     * Memperbarui foto profil pengguna
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \Exception
+     *
+     * @bodyParam profile_image file required Foto profil. Allowed:jpeg,png,jpg. Max:2048KB
+     *
+     * @response {
+     *   "success": true,
+     *   "message": "Foto profil berhasil diperbarui",
+     *   "photo_url": "http://example.com/storage/profile_photos/filename.jpg"
+     * }
+     */
     public function updateImgs(Request $request)
     {
         try {
