@@ -9,6 +9,10 @@ use App\Models\Announcement;
 use App\Models\Achievement;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
+use App\Models\User;
+use App\Models\Comment;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 /**
  * Controller untuk mengelola semua fungsionalitas terkait berita/artikel
  *
@@ -616,5 +620,65 @@ class BeritaController extends Controller
     public function statistika()
     {
         return $this->getFakultasBerita('statistika');
+    }
+
+    /**
+     * Menampilkan profil user beserta artikel dan komentar mereka
+     *
+     * @param string|null $username Username dari user yang akan ditampilkan
+     * @return \Illuminate\View\View
+     */
+    public function userProfile($username = null)
+    {
+        try {
+            // Jika username tidak ada, gunakan user yang sedang login
+            if (!$username) {
+                $user = Auth::user();
+            } else {
+                // Jika melihat profil user lain
+                $user = User::where('username', $username)->firstOrFail();
+            }
+
+            // Ambil artikel yang ditulis user
+            $articles = Article::with(['category', 'comments'])
+                ->where('author_id', $user->id)
+                ->where('status', 'published')
+                ->latest('published_at')
+                ->paginate(5, ['*'], 'articles');
+
+            // Ambil komentar yang dibuat user
+            $comments = Comment::with(['article', 'user'])
+                ->where('user_id', $user->id)
+                ->latest()
+                ->paginate(5, ['*'], 'comments');
+
+            // Statistik user
+            $stats = [
+                'total_articles' => Article::where('author_id', $user->id)
+                                         ->where('status', 'published')
+                                         ->count(),
+                'total_comments' => Comment::where('user_id', $user->id)->count(),
+                'total_views' => Article::where('author_id', $user->id)
+                                       ->where('status', 'published')
+                                       ->sum('views'),
+            ];
+
+            return view('itesa_ac_id.berita.profile', compact(
+                'user',
+                'articles',
+                'comments',
+                'stats'
+            ));
+
+        } catch (ModelNotFoundException $e) {
+            return redirect()
+                ->route('berita.index')
+                ->with('error', 'User tidak ditemukan');
+        } catch (\Exception $e) {
+            \Log::error('Error in user profile: ' . $e->getMessage());
+            return redirect()
+                ->route('berita.index')
+                ->with('error', 'Terjadi kesalahan saat memuat profil');
+        }
     }
 }

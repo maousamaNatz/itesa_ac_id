@@ -71,14 +71,18 @@ class LoginController extends Controller
 
     public function logout(Request $request)
     {
-        Auth::logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
+        try {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
 
-        return redirect('/login')->with('notification', [
-            'type' => 'success',
-            'title' => 'Logout Berhasil!',
-            'message' => 'Anda telah keluar dari sistem'
-        ]);
+            return redirect()->route('home')->with('success', [
+                'title' => 'Logout Berhasil!',
+                'message' => 'Anda telah keluar dari sistem'
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Error during logout: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Terjadi kesalahan saat logout');
+        }
     }
 }

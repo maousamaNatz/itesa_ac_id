@@ -54,6 +54,21 @@ Route::prefix('berita')->name('berita.')->group(function () {
     Route::get('/agenda', [BeritaController::class, 'agendaShow'])->name('agendaShow');
 });
 
+/*
+*
+* Route User Profile
+*
+*/
+Route::middleware(['auth'])->prefix('user')->name('user.')->group(function () {
+    Route::get('/profile', [UserController::class, 'profile'])->name('profile');
+    Route::get('/profile/edit', [UserController::class, 'edit'])->name('edit');
+    Route::get('/profile/comment', [UserController::class, 'comment'])->name('comment');
+    Route::post('/user/profile/photo', [UserController::class, 'uploadPhoto'])->name('photo.upload');
+    Route::post('/profile/update', [UserController::class, 'update'])->name('update');
+    Route::delete('/profile/delete', [UserController::class, 'destroy'])->name('destroy');
+    Route::get('/profile', [BeritaController::class, 'userProfile'])->name('profile');
+});
+
 
 /*
 *
@@ -171,8 +186,8 @@ if (config('app.debug')) {
 
 Route::get('/api/users/search', function(Request $request) {
     $query = $request->get('query');
-    return User::where('name', 'LIKE', "%{$query}%")
-               ->select('id', 'name', 'avatar')
+    return User::where('username', 'LIKE', "%{$query}%")
+               ->select('id', 'username', 'profile_photo')
                ->limit(5)
                ->get();
 });

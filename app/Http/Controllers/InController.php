@@ -32,11 +32,9 @@ class InController extends Controller
                 $latestArticles = Article::query()
                     ->with(['author', 'categories'])
                     ->where('status', 'published')
-                    ->whereHas('categories', function($query) {
-                        $query->where('categories.id', 1);
-                    })
-                    ->orderBy('created_at', 'desc')
-                    ->take(4)
+                    ->whereNotNull('published_at')
+                    ->latest('published_at')
+                    ->take(8)
                     ->get();
 
                 // Log untuk debugging

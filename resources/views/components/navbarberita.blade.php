@@ -48,11 +48,11 @@
                         <div class="user-profile dropdown">
                             <button type="button" class="dropdown-toggle" onclick="toggleDropdown(this)">
                                 @if(Auth::user()->profile_photo)
-                                    <img src="{{ asset('storage/profile_photos/' . Auth::user()->profile_photo) ?? asset('./lib/default_media/default.jpg')}}" alt="Profile" class="profile-photo">
+                                <img src="{{ asset('storage/profile_photos/' . Auth::user()->profile_photo) }}" alt="Profile" class="profile-photo">
                                 @else
                                     <img src="{{ asset('lib/default_media/default.jpg') }}" alt="Default Profile" class="profile-photo">
                                 @endif
-                                <span class="user-name">{{ Auth::user()->name }}</span>
+                                <span class="user-name">{{ Auth::user()->username }}</span>
                             </button>
                             <div class="dropdown-menu">
                                 @if (Auth::user()->role === 'admin')
@@ -60,8 +60,6 @@
                                     <li class="dropdown-divider"></li>
                                 @else
                                     <li><a href="{{ route('user.profile') }}">Profil Saya</a></li>
-                                    <li><a href="{{ route('user.comments') }}">Komentar Saya</a></li>
-                                    <li><a href="{{ route('user.bookmarks') }}">Bookmark</a></li>
                                     <li class="dropdown-divider"></li>
                                 @endif
                                 <li>

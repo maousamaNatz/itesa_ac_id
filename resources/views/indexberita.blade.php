@@ -17,6 +17,11 @@
 
     <!-- Footer -->
     @include('components.footerberita')
+    @if(Route::is('profile'))
+    <script src="{{ asset('lib/js/profile.js') }}"></script>
+    @endif
     <script src="{{ asset('lib/js/berita.js') }}"></script>
+    @yield('scripts')
 </body>
 </html>
+

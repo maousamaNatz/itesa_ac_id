@@ -21,12 +21,24 @@ class DatabaseSeeder extends Seeder
         //     'name' => 'Test User',
         //     'email' => 'test@example.com',
         // ]);
+
+
+        // Admin
         User::create([
             'username' => 'Admin ITESA',
             'email' => 'admin@itesa.ac.id',
             'password' => Hash::make('admin123'),
             'role' => 'admin',
             'bio' => 'Administrator Portal Berita ITESA',
+        ]);
+
+        // User
+        User::create([
+            'username' => 'User ITESA',
+            'email' => 'user@itesa.ac.id',
+            'password' => Hash::make('user123'),
+            'role' => 'user',
+            'bio' => '',
         ]);
 
         $categories = [
